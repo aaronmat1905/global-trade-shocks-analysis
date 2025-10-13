@@ -1,4 +1,5 @@
 # Global Commodity Shocks, International Trade Linkages, and Economic Resilience: Causal Impacts and Predictive Modelling of Sectoral Stress
+## ADA Course Project **(UE23AM343AB1)**
 
 This repository investigates how global commodity shocks—including energy, food, and metal price volatility—propagate through international trade networks and affect sectoral stress and economic resilience. By analyzing trade linkages with major partners such as the U.S., China, the EU, and Gulf economies, the study identifies causal pathways through which external shocks impact agriculture, manufacturing, energy-intensive industries, and exports. Predictive modeling techniques are applied to quantify vulnerabilities and assess resilience under different shock scenarios.
 
@@ -77,7 +78,7 @@ global-commodity-shocks/
 
 ## Team
 
-**Aaron Thomas Mathew**: [https://github.com/aaronmat1905](https://github.com/aaronmat1905)
-**Akarsh T**: [https://github.com/placeholder](https://github.com/placeholder)
-**Anirudh Krishnan**: [https://github.com/placeholder](https://github.com/placeholder)
-**Preetham VJ**: [https://github.com/PreethamVJ](https://github.com/PreethamVJ)
+1. **Aaron Thomas Mathew**: [https://github.com/aaronmat1905](https://github.com/aaronmat1905)
+2. **Akarsh T**: [https://github.com/Akarsh8T](https://github.com/Akarsh8T)
+3. **Anirudh Krishnan**: [https://github.com/Anirudh553](https://github.com/Anirudh553)
+4. **Preetham VJ**: [https://github.com/PreethamVJ](https://github.com/PreethamVJ)
