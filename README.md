@@ -50,68 +50,49 @@ Unlike prior work, which often focuses on aggregate effects or isolated shocks, 
 ## Directory Structure
 
 ```
-
-Global_Commodity_Shocks_Trade_Networks/
+global-trade-shocks-analysis/
 │
 ├── README.md
 ├── requirements.txt
-├── setup.bat                          # Windows batch file for auto-setup
-├── setup.sh                           # Linux/Mac shell script for auto-setup
 ├── .gitignore
 │
 ├── data/
 │   ├── raw/                          # Original downloaded data (never modify)
-│   │   ├── commodity_prices/
-│   │   │   └── wb_pink_sheet_commodities.xlsx
-│   │   ├── trade/
-│   │   │   ├── comtrade_india_bilateral_raw.csv
-│   │   │   └── comtrade_responses/   # API JSON responses
-│   │   ├── input_output/
-│   │   │   ├── mospi_io_2015_16_use.csv
-│   │   │   ├── mospi_io_2015_16_make.csv
-│   │   │   └── mospi_io_2020_21_supply_use.xlsx
-│   │   ├── macroeconomic/
-│   │   │   ├── rbi_iip.csv
-│   │   │   ├── rbi_wpi.csv
-│   │   │   ├── rbi_gdp.csv
-│   │   │   ├── rbi_exchange_rate.csv
-│   │   │   └── rbi_trade.csv
-│   │   ├── global/
-│   │   │   ├── oecd_gdp_growth.csv
-│   │   │   ├── oecd_commodity_indices.csv
-│   │   │   ├── oecd_trade_volumes.csv
-│   │   │   └── imf_ifs_data.csv
-│   │   └── instruments/
-│   │       ├── opec_production.csv
-│   │       ├── opec_quota_decisions.csv
-│   │       ├── noaa_enso_indices.csv
-│   │       └── spei_drought_indices.csv
+│   │   ├── CMO-Historical-Data-Monthly.xlsx
+│   │   ├── IMTSTrade.csv
+│   │   ├── WITS-Partner.xlsx
+│   │   ├── IndexofIndustrialProduction.xlsx
+│   │   ├── WholesalePriceIndexMonthlyData.xlsx
+│   │   ├── GDP_Constant.xlsx
+│   │   ├── GDP_Current.xlsx
+│   │   ├── GVA_Current.xlsx
+│   │   └── OECD_file.csv
 │   │
 │   ├── processed/                    # Cleaned, transformed data
-│   │   ├── commodity_prices_clean.csv
-│   │   ├── trade_flows_clean.csv
-│   │   ├── trade_energy_clean.csv
-│   │   ├── trade_food_clean.csv
-│   │   ├── trade_metals_clean.csv
-│   │   ├── rbi_sectoral_clean.csv
-│   │   ├── io_coefficient_matrix.csv
-│   │   ├── io_make_matrix.csv
-│   │   ├── leontief_inverse.csv
-│   │   ├── sector_classification.csv
-│   │   ├── sector_linkages.csv
-│   │   ├── network_features.csv
-│   │   ├── trade_exposure.csv
-│   │   ├── instruments.csv
-│   │   ├── iv_regression_data.csv
-│   │   ├── scm_donor_pool.csv
-│   │   ├── scm_predictors.csv
-│   │   ├── features_engineered.csv
-│   │   ├── features_normalized.csv
-│   │   ├── master_dataset.csv
-│   │   ├── train.csv
-│   │   └── test.csv
+│   │   ├── proc_cmo_monthly.csv                # Commodity prices with shocks
+│   │   ├── climate_oni_clean.csv               # Climate indices (ONI)
+│   │   ├── trade_india_bilateral.csv           # Bilateral trade flows
+│   │   ├── country_mapping.csv                 # ISO3 codes and regions
+│   │   ├── iso_dataset_enriched.csv            # Trade data with ISO codes
+│   │   ├── iip_sectoral.csv                    # Industrial production indices
+│   │   ├── wpi_inflation.csv                   # Wholesale price inflation
+│   │   ├── gdp_quarterly.csv                   # GDP with growth rates
+│   │   ├── global_macro.csv                    # OECD G20 data
+│   │   ├── MOSPI Matrix Final - ALL.csv        # Input-Output matrix
+│   │   ├── MOSPI_Cleaned_non_matrix.xlsx       # I-O non-matrix data
+│   │   ├── master_dataset.csv                  # Complete merged dataset
+│   │   ├── master_dataset_filtered.csv         # Filtered (2010-2024)
+│   │   └── master_dataset_columns.csv          # Metadata
 │   │
-│   └── external/                     # Third-party datasets (if any)
+│   ├── processed_io_data/            # Network analysis outputs
+│   │   ├── technical_coefficients.csv
+│   │   ├── leontief_inverse.csv
+│   │   ├── production_network_nodes.csv
+│   │   ├── production_network_edges.csv
+│   │   └── network_metrics.csv
+│   │
+│   ├── external/                     # Third-party datasets (if any)
+│   └── data-dictionary.md            # Data documentation
 │
 ├── networks/                         # Network graph objects
 │   ├── trade_network_full.gpickle
@@ -139,30 +120,20 @@ Global_Commodity_Shocks_Trade_Networks/
 │   │
 │   ├── data_collection/
 │   │   ├── __init__.py
-│   │   ├── download_worldbank.py
-│   │   ├── download_comtrade.py
-│   │   ├── download_mospi.py
-│   │   ├── download_rbi.py
-│   │   ├── download_oecd.py
-│   │   └── download_instruments.py
+│   │   └── download_worldbank.py         # World Bank data fetcher
 │   │
 │   ├── data_processing/
 │   │   ├── __init__.py
-│   │   ├── clean_commodity_prices.py
-│   │   ├── clean_trade_data.py
-│   │   ├── clean_macro_data.py
-│   │   ├── process_io_tables.py
-│   │   ├── merge_master_dataset.py
-│   │   └── utils.py
+│   │   ├── clean_data.py                 # Complete data cleaning pipeline
+│   │   ├── create_master_dataset.py      # Master dataset creation
+│   │   ├── clean_commodity_prices.py     # Existing placeholder
+│   │   └── README.md                     # Data processing documentation
 │   │
 │   ├── network_analysis/
 │   │   ├── __init__.py
-│   │   ├── build_trade_network.py
-│   │   ├── build_production_network.py
-│   │   ├── calculate_centrality.py
-│   │   ├── calculate_linkages.py
-│   │   ├── network_topology.py
-│   │   └── visualize_networks.py
+│   │   ├── process_io_table.py           # I-O table processing & network metrics
+│   │   ├── build_trade_network.py        # Existing placeholder
+│   │   └── visualize_networks.py         # Existing placeholder
 │   │
 │   ├── causal_inference/
 │   │   ├── __init__.py
@@ -220,13 +191,10 @@ Global_Commodity_Shocks_Trade_Networks/
 │           └── scenario_viz.py
 │
 ├── notebooks/                        # Jupyter notebooks for exploration
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_network_construction.ipynb
-│   ├── 03_causal_analysis.ipynb
-│   ├── 04_feature_engineering.ipynb
-│   ├── 05_model_training.ipynb
-│   ├── 06_scenario_simulation.ipynb
-│   └── Tutorial_Reproducing_Results.ipynb
+│   ├── data_cleaning.ipynb           # Data cleaning exploration (→ clean_data.py)
+│   ├── iotable_processing.ipynb      # I-O table processing (→ process_io_table.py)
+│   ├── create_master_dataset.ipynb   # Master dataset creation
+│   └── (additional notebooks TBD)
 │
 ├── models/                           # Saved trained models
 │   ├── baseline_ols.pkl
@@ -366,6 +334,68 @@ Global_Commodity_Shocks_Trade_Networks/
     └── error.log
 
 ```
+---
+
+## Current Implementation Status
+
+### ✓ Completed Components
+
+#### Data Processing Pipeline
+- **[src/data_processing/clean_data.py](src/data_processing/clean_data.py)** - Complete data cleaning pipeline
+  - Commodity prices processing (CMO data with shocks, volatility)
+  - Climate data (ONI indices with ENSO classification)
+  - Trade data processing (bilateral flows by commodity group)
+  - IIP sectoral data (industrial production indices)
+  - WPI data (wholesale price inflation)
+  - GDP data (quarterly estimates with growth rates)
+  - OECD data (G20 macro indicators)
+
+- **[src/network_analysis/process_io_table.py](src/network_analysis/process_io_table.py)** - I-O table processing & network analysis
+  - Technical coefficients calculation
+  - Leontief inverse matrix computation
+  - Backward/forward linkage analysis
+  - Network centrality metrics (PageRank, betweenness, degree, closeness, eigenvector)
+  - Production network edge list generation
+
+- **[src/data_processing/create_master_dataset.py](src/data_processing/create_master_dataset.py)** - Master dataset creation
+  - Merges all processed datasets
+  - IIP to I-O sector mapping (22 manufacturing sectors)
+  - Derived variables & feature engineering
+  - Lagged variables for econometric analysis
+  - Energy intensity flags & interaction terms
+
+#### Processed Datasets Available
+- `data/processed/master_dataset.csv` - **3,476 rows × 93 columns** (2012-2024, 22 sectors)
+- All intermediate processed files in `data/processed/`
+- Network metrics in `data/processed_io_data/`
+
+#### Documentation
+- Complete data processing documentation in [src/data_processing/README.md](src/data_processing/README.md)
+- Data dictionary in [data/data-dictionary.md](data/data-dictionary.md)
+
+### 🚧 In Development
+- Causal inference methods (IV, Synthetic Control, VAR)
+- ML models (LSTM, XGBoost, GNN)
+- Scenario analysis & vulnerability assessment
+- Interactive dashboard
+
+### 📊 Quick Start
+
+To regenerate all processed data:
+
+```bash
+# 1. Clean raw data sources
+python src/data_processing/clean_data.py
+
+# 2. Process I-O tables and calculate network metrics
+python src/network_analysis/process_io_table.py
+
+# 3. Create master dataset
+python src/data_processing/create_master_dataset.py
+```
+
+All outputs will be saved to `data/processed/` and `data/processed_io_data/`.
+
 ---
 
 ## References
