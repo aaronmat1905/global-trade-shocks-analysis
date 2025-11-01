@@ -1,0 +1,8 @@
+filename,type,description,use_case
+bottleneck_vulnerability_map.png,static,Bottleneck analysis showing critical chokepoints,Presentation - identifying vulnerabilities
+shortest_path_example.png,static,Example shortest path from commodity to final good,Documentation - supply chain pathways
+shock_simulation_heatmap.png,static,Heatmap showing shock propagation impacts,Presentation - shock impact analysis
+multiplier_waterfall.html,interactive,Waterfall chart showing multiplier cascade,Presentation - multiplier effects
+network_resilience_curves.png,static,Resilience curves comparing targeted vs random failure,Technical documentation - network robustness
+dynamic_centrality_analysis.png,static,Before/after centrality comparison,Presentation - adaptation after shock
+network_3d_visualization.html,interactive,3D interactive network with hierarchical structure,Presentation - interactive exploration
