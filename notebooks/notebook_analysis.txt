@@ -1,0 +1,1230 @@
+=== NOTEBOOK STRUCTURE ANALYSIS ===
+
+Total cells: 76
+Markdown cells: 19
+Code cells: 57
+
+=== ALL MARKDOWN CONTENT ===
+
+--- Cell 0 ---
+# **Causal Analysis: Instrumental Variables, Synthetic Control and VAR**
+
+This notebook establishes causal relationships between commodity price shocks and sectoral IIP using three Complementary Methods
+================================================================================
+
+--- Cell 3 ---
+**The Master Dataset**
+================================================================================
+
+--- Cell 7 ---
+# **Part A**: Instrumental Variables (IV) analysis
+================================================================================
+
+--- Cell 8 ---
+### **Valid Instruments from Literature Survey**
+
+#### Instrument 1: OPEC Production Quotas
+
+- **Exogeneity:** OPEC production decisions are made collectively by member countries based on geopolitical interests and internal cartel dynamics, independent of India’s manufacturing or industrial output. This provides strong exogeneity because the shocks originate far outside the scope of Indian domestic policy or demand fluctuations.
+- **Relevance:** OPEC quotas have an immediate and measurable impact on global oil supply, which in turn influences international oil prices. These price changes transmit to India through import costs and can affect downstream input costs in manufacturing.
+- **Literature Support:**
+  - Hamilton (2009), “Causes and Consequences of the Oil Shock of 2007-08”: Demonstrates how OPEC’s supply decisions drive international oil price shocks and impact real economic activity.
+  - Kilian (2009), “Not All Oil Price Shocks Are Alike”: Differentiates exogenous oil supply shocks from those related to demand and elaborates on the implications for empirical identification strategies.
+  - Baumeister & Hamilton (2019): Presents advanced modeling of structural oil market shocks, emphasizing OPEC-driven events as valid external instruments.
+- **Expected First-Stage Relationship:** Reductions in OPEC quotas are expected to cause increases in oil prices, which statistically would appear as a negative coefficient in a first-stage regression using quotas as an instrument.
+
+***
+
+#### Instrument 2: El Niño-Southern Oscillation (ONI Index)
+
+- **Exogeneity:** The ONI index measures oceanic temperature anomalies driving El Niño events that are entirely exogenous to Indian economic output. ENSO cycles originate globally and are uninfluenced by regional policy or production trends.
+- **Relevance:** El Niño conditions are statistically linked to reduced precipitation and heat shocks in South Asia, which result in crop failures, lower yields, and higher food commodity prices—particularly for staples such as rice and wheat.
+- **Literature Support:**
+  - Hsiang & Meng (2015), “Tropical Economics”: Reviews mechanisms by which global climate variability impacts agricultural productivity and economic outcomes.
+  - Dell et al. (2014), “What Do We Learn from the Weather?”: Explores empirical connections between weather shocks (including ENSO) and macroeconomic performance.
+  - Cashin et al. (2017): Quantifies relationships between climate-induced shocks and international commodity prices.
+- **Expected First-Stage Relationship:** Positive ONI values (El Niño episodes) are associated with increased food prices in India, especially wheat and rice—generally expressed as a positive coefficient.
+
+***
+
+#### Instrument 3: Rainfall Deviations (Standardized Anomalies)
+
+- **Exogeneity:** Rainfall deviations (measured as standardized anomalies) in key agricultural regions of India reflect stochastic climate shocks, fundamentally external to the domestic production system. These deviations are considered valid instruments because they are unpredictable, originate from atmospheric conditions, and cannot be easily influenced by policy or economic actors.
+- **Relevance:** Deviations from long-run mean rainfall affect crop output directly, pushing commodity prices higher or lower as supply fluctuates. For India, erratic monsoon rainfall remains a dominant determinant of food price volatility.
+- **Literature Support:** Cashin et al. (2017) and Dell et al. (2014) provide empirical support for using both ONI and direct rainfall measures as instruments for commodity price shocks.
+- **Expected First-Stage Relationship:** Negative rainfall anomalies (drought conditions) lead to higher food prices; positive anomalies can moderate prices or induce declines, typically a positive price response to negative rainfall shocks.
+
+***
+
+### 2025-Oriented Data Context
+
+- As of 2025, OPEC has continued to exert substantial influence over oil prices through quota management, with recent supply reductions in 2023–2025 contributing to elevated oil benchmarks globally.
+- The 2023–2024 El Niño was classified as strong, resulting in severe drought impacts and commodity price spikes in multiple Asian countries, including India.
+- Rainfall anomalies during the 2024 and early 2025 monsoons saw record-setting deviations in central and northern India, driving up wheat and pulse prices nationwide.
+
+***
+
+**References:**  
+ Hamilton (2009), Causes and Consequences of the Oil Shock of 2007-08  
+ Kilian (2009), Not All Oil Price Shocks Are Alike  
+ Hsiang & Meng (2015), Tropical Economics  
+ Cashin et al. (2017); Dell et al. (2014), What Do We Learn from the Weather?
+================================================================================
+
+--- Cell 9 ---
+## Check ONI Instrument
+================================================================================
+
+--- Cell 11 ---
+### Handling Missing Data in ONI
+================================================================================
+
+--- Cell 18 ---
+### ONI Summary Stats
+================================================================================
+
+--- Cell 21 ---
+Verify Endogenous Variables: (Commodity Prices)
+================================================================================
+
+--- Cell 23 ---
+Check Control Variables
+================================================================================
+
+--- Cell 26 ---
+# Create Additional Instrument Variables
+================================================================================
+
+--- Cell 30 ---
+# Visualize ONI Instrument over Time
+================================================================================
+
+--- Cell 33 ---
+# Instrument Relevance- ONI Vs. Commodity Prices
+================================================================================
+
+--- Cell 37 ---
+## **Instrumental Variables Framework**
+
+### **Research Question**
+What is the causal effect of commodity price shocks on India's sectoral manufacturing output?
+
+---
+
+### **Identification Challenge: Endogeneity**
+
+**Why OLS is biased:**
+1. **Reverse causality:** India's manufacturing demand affects global commodity prices
+2. **Omitted variables:** Global economic conditions affect both prices and IIP
+3. **Measurement error:** Price indices may not capture true input costs
+
+---
+
+### **Instrumental Variables Strategy**
+
+**Instrument:** ONI (El Niño-Southern Oscillation Index)
+
+**Exogeneity:** 
+- Weather patterns determined by ocean-atmosphere dynamics
+- Completely independent of India's manufacturing decisions
+- No direct effect on Indian manufacturing (India's monsoon is separate from Pacific ONI)
+
+**Relevance:**
+- El Niño causes droughts in major agricultural regions → ↑ wheat/rice prices
+- Extreme weather disrupts mining and oil production → ↑ oil/copper prices
+- Well-documented in literature (Hsiang & Meng 2015, Dell et al. 2014, Cashin et al. 2017)
+
+---
+
+### **Two-Stage Least Squares (2SLS) Specification**
+
+**First Stage:** Test if ONI predicts commodity prices
+```
+commodity_price_t = α + β₁(ONI_t) + β₂(ONI_lag3_t) + γ(Controls) + Year_FE + Month_FE + ε
+```
+
+**Key test:** F-statistic > 10 (Stock & Yogo 2005 weak instrument threshold)
+
+**Second Stage:** Estimate causal effect on IIP
+```
+iip_yoy_growth_it = δ + θ₁(commodity_price_hat_t) + φ(Controls) + Sector_FE + Time_FE + υ
+```
+
+**Key coefficient:** θ₁ = causal effect of commodity price on sectoral IIP
+
+---
+
+### **Control Variables**
+
+**Domestic Macroeconomic:**
+- `gdp_growth_yoy`: Aggregate demand conditions
+- `wpi_inflation`: General price level
+
+**Sector Characteristics (from I-O table):**
+- `backward_linkage`: Sector's demand intensity
+- `forward_linkage`: Sector's supply intensity
+- `degree_centrality`: Network position
+
+**Fixed Effects:**
+- Year dummies: Control for global trends
+- Month dummies: Control for seasonality
+- Sector dummies (second stage): Control for sector-specific factors
+
+---
+
+### **Identification Assumption (Exclusion Restriction)**
+
+**Critical assumption:** ONI affects sectoral IIP **ONLY** through its effect on commodity prices, not through any other channel.
+
+**Potential violations:**
+1. **ONI directly affects Indian weather?** 
+   - Answer: ONI measures Pacific Ocean temperatures, not local Indian monsoon
+   - Indian monsoon has separate drivers (Indian Ocean Dipole)
+   
+2. **ONI affects Indian agriculture → affects manufacturing?**
+   - Answer: We control for GDP growth which captures aggregate demand effects
+   - Focus on non-food manufacturing sectors for robustness
+
+**Testable implications:**
+- ONI should not predict IIP in sectors with no commodity price exposure
+- Effect should be stronger in commodity-intensive sectors
+================================================================================
+
+--- Cell 38 ---
+# PREPARE IV REGRESSION DATASET
+================================================================================
+
+--- Cell 46 ---
+# **First Stage Regressions**
+================================================================================
+
+--- Cell 47 ---
+## FIRST-STAGE REGRESSION: ONI → WHEAT PRICE
+================================================================================
+
+--- Cell 53 ---
+## FIRST-STAGE REGRESSION - OIL PRICE
+================================================================================
+
+--- Cell 60 ---
+# FIRST-STAGE REGRESSION - RICE PRICE
+================================================================================
+
+--- Cell 64 ---
+# Stage 2: Second-Stage 2SLS and Validation
+================================================================================
+
+
+
+=== CODE CELL SUMMARIES ===
+
+--- Code Cell 1 ---
+# Importing All Libraries
+import pandas as pd 
+import numpy as np 
+import statsmodels as st 
+import scipy.stats as stp
+from statsmodels.regression.linear_model import OLS
+from statsmodels.tools import add_constant 
+import statsmodels.api as sm 
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches 
+import seaborn as sns 
+import warnings 
+import os 
+import datetime
+
+
+np.random.seed(42)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+... [truncated] ...
+================================================================================
+
+--- Code Cell 2 ---
+# All File Paths
+root_path = r"../"
+processed_data_path = "../data/processed/"
+io_data_path = "../data/processed_io_data/"
+output_sprint2= "./sprint2_outputs/"
+figures_path = "./spirnt2_outputs/figures/"
+
+# Creating Output directories: 
+os.makedirs(figures_path, exist_ok=True)
+print("Output Directories Intiated")
+================================================================================
+
+--- Code Cell 4 ---
+# Loading Master Dataset
+masterDF = pd.read_csv(processed_data_path + "master_dataset.csv")
+masterDF.tail(3)
+================================================================================
+
+--- Code Cell 5 ---
+masterDF.info()
+================================================================================
+
+--- Code Cell 6 ---
+print("Unique Sectors:")
+display(pd.Series(masterDF["sector_name"].unique()))
+================================================================================
+
+--- Code Cell 10 ---
+# Check for Missing Values: 
+oni_cols = ["ONI", 'ONI_lag_1m', "ONI_lag_3m", "ONI_lag_6m"]
+oni_missing = masterDF[oni_cols].isnull().sum()
+print("Missing Values in ONI Variables")
+display(oni_missing)
+print(f"Total Number of Data Points: {len(masterDF[oni_cols])}")
+================================================================================
+
+--- Code Cell 12 ---
+# ONI Has missing values, So when checking, The data source only had 1950 - 2017, but we needed 2000-2024(5
+# Went to website: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php and manually extracted the below data
+
+
+# STEP 1: CREATE ONI DATA FROM NOAA TABLE (2014-2025)
+
+# Month mapping for 3-month rolling averages
+# Assign each 3-month period to the MIDDLE month
+month_mapping = {
+    'DJF': '01',  # Dec-Jan-Feb → January
+    'JFM': '02',  # Jan-Feb-Mar → February  
+    'FMA': '03',  # Feb-Mar-Apr → March
+    'MAM': '04',  # Mar-Apr-May → April
+    'AMJ': '05',  # Apr-May-Jun → May
+    'MJJ': '06',  # May-Jun-Jul → June
+    'JJA': '07',  # Jun-Jul-Aug → July
+    'JAS': '08',  # Jul-Aug-Sep → August
+    'ASO': '09',  # Aug-Sep-Oct → September
+    'SON': '10',  # Sep-Oct-Nov → October
+    'OND': '11',  # Oct-Nov-Dec → November
+... [truncated] ...
+================================================================================
+
+--- Code Cell 13 ---
+# Convert to DataFrame
+oni_rows = []
+for year, months in oni_data.items():
+    for month_code, oni_value in months.items():
+        month_num = month_mapping[month_code]
+        date = pd.to_datetime(f"{year}-{month_num}-01")
+        oni_rows.append({
+            'date': date,
+            'Year': year,
+            'Month': month_code,
+            'ONI': oni_value
+        })
+
+oni_noaa = pd.DataFrame(oni_rows)
+oni_noaa = oni_noaa.sort_values('date').reset_index(drop=True)
+
+print(f"\nCreated ONI data from NOAA table: {len(oni_noaa)} rows")
+print(f"  Date range: {oni_noaa['date'].min()} to {oni_noaa['date'].max()}")
+================================================================================
+
+--- Code Cell 14 ---
+# STEP 2: CALCULATE LAGGED ONI VARIABLES
+
+oni_noaa['ONI_lag_1m'] = oni_noaa['ONI'].shift(1)
+oni_noaa['ONI_lag_3m'] = oni_noaa['ONI'].shift(3)
+oni_noaa['ONI_lag_6m'] = oni_noaa['ONI'].shift(6)
+
+print("\n Calculated lagged ONI variables (1m, 3m, 6m)")
+
+# STEP 3: ASSIGN ENSO PHASE
+
+
+oni_noaa['ENSO_Phase'] = 'Neutral'
+oni_noaa.loc[oni_noaa['ONI'] > 0.5, 'ENSO_Phase'] = 'El Nino'
+oni_noaa.loc[oni_noaa['ONI'] < -0.5, 'ENSO_Phase'] = 'La Nina'
+
+print("\n Assigned ENSO Phase (El Nino > 0.5, La Nina < -0.5, else Neutral)")
+
+# Display phase distribution
+phase_counts = oni_noaa['ENSO_Phase'].value_counts()
+print("\nENSO Phase Distribution (2014-2025):")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 15 ---
+# STEP 4: LOAD EXISTING ONI DATA (IF EXISTS)
+try:
+    oni_existing = pd.read_csv('../data/processed/climate_oni_clean.csv')
+    oni_existing['Date'] = pd.to_datetime(oni_existing['Date'])
+    oni_existing = oni_existing.rename(columns={'Date': 'date'})
+    
+    # Keep only columns that match
+    common_cols = ['date', 'ONI', 'ONI_lag_1m', 'ONI_lag_3m', 'ONI_lag_6m', 'ENSO_Phase']
+    oni_existing = oni_existing[common_cols]
+    
+    print(f"✓ Loaded existing ONI data: {len(oni_existing)} rows")
+    print(f"  Existing date range: {oni_existing['date'].min()} to {oni_existing['date'].max()}")
+    
+    # Identify overlap
+    overlap_start = max(oni_existing['date'].min(), oni_noaa['date'].min())
+    overlap_end = min(oni_existing['date'].max(), oni_noaa['date'].max())
+    
+    if overlap_start <= overlap_end:
+        print(f"\n Overlap detected: {overlap_start} to {overlap_end}")
+        print("  Strategy: Keep existing data before 2014, use NOAA data from 2014 onwards")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 16 ---
+# STEP 5: COMBINE OLD + NEW ONI DATA
+
+# Combine
+oni_complete = pd.concat([oni_existing, oni_noaa[common_cols]], ignore_index=True)
+
+# Remove any duplicates (keep NOAA version if conflict)
+oni_complete = oni_complete.sort_values('date')
+oni_complete = oni_complete.drop_duplicates(subset='date', keep='last')
+oni_complete = oni_complete.reset_index(drop=True)
+
+print(f"\n✓ Combined ONI dataset created:")
+print(f"  Total rows: {len(oni_complete)}")
+print(f"  Date range: {oni_complete['date'].min()} to {oni_complete['date'].max()}")
+print(f"  Missing ONI values: {oni_complete['ONI'].isnull().sum()}")
+
+# STEP 6: SAVE COMPLETE ONI DATASET
+
+
+oni_complete_path = '../data/processed/oni_complete_2010_2025.csv'
+oni_complete.to_csv(oni_complete_path, index=False)
+... [truncated] ...
+================================================================================
+
+--- Code Cell 17 ---
+# STEP 7: MERGE WITH MASTER DATASET
+
+# FIX: Convert date column to datetime FIRST
+print("\n[1] Fixing date column types...")
+print(f"  masterDF['date'] current type: {masterDF['date'].dtype}")
+print(f"  oni_complete['date'] current type: {oni_complete['date'].dtype}")
+
+# Convert masterDF date to datetime
+masterDF['date'] = pd.to_datetime(masterDF['date'])
+
+print(f"\n  After conversion:")
+print(f"  masterDF['date'] type: {masterDF['date'].dtype}")
+print(f"  oni_complete['date'] type: {oni_complete['date'].dtype}")
+print("  ✓ Date types matched!")
+
+# Print master dataset info BEFORE merge
+print(f"\n[2] Master dataset BEFORE merge:")
+print(f"  Rows: {len(masterDF):,}")
+print(f"  Date range: {masterDF['date'].min()} to {masterDF['date'].max()}")
+if 'ONI' in masterDF.columns:
+... [truncated] ...
+================================================================================
+
+--- Code Cell 19 ---
+# # ONI Statistics
+print("ONI Summary Statistics")
+
+oni_stats = masterDF[oni_cols].describe()
+display(oni_stats)
+================================================================================
+
+--- Code Cell 20 ---
+# Count Enso Phases: 
+if "ENSO_Phase" in masterDF.columns: 
+    enso_counts = masterDF['ENSO_Phase'].value_counts()
+    print("ENSO Phase Distribution:")
+    display(enso_counts)
+    # Calculate Percentages:
+    total = len(masterDF['ENSO_Phase'].dropna())
+    for phase, count in enso_counts.items(): 
+        pct = (count/total)*100
+        print(f" {phase}: {count} ({pct:.1f}%)")
+================================================================================
+
+--- Code Cell 22 ---
+commodity_cols = ['CRUDE_PETRO', 'WHEAT_US_HRW', 'RICE_05', 'COPPER', 'ALUMINUM']
+
+for col in commodity_cols:
+    if col in masterDF.columns:
+        non_missing = masterDF[col].notna().sum()
+        print(f"    {col}:")
+        print(f"    Mean: ${masterDF[col].mean():.2f}")
+        print(f"    Std Dev: ${masterDF[col].std():.2f}")
+        print(f"    Range: ${masterDF[col].min():.2f} - ${masterDF[col].max():.2f}")
+        print(f"    Non-missing: {non_missing:,} observations")
+        print("     ===========")
+    else:
+        print(f"  {col}: NOT FOUND")
+================================================================================
+
+--- Code Cell 24 ---
+control_vars = ['g20_avg_cpi_growth', 'gdp_growth_yoy', 'energy_trade_value', 
+                'total_trade_value', 'USA', 'CHN']
+
+available_controls = []
+for var in control_vars:
+    if var in masterDF.columns:
+        available_controls.append(var)
+        missing = masterDF[var].isnull().sum()
+        print(f"  {var} (missing: {missing})")
+    else:
+        print(f"  {var}: Not available")
+================================================================================
+
+--- Code Cell 25 ---
+# Part 4: Summary
+print("\n" + "="*70)
+print("INSTRUMENT STRATEGY SUMMARY")
+print("="*70)
+print("✓ PRIMARY INSTRUMENT: ONI Index + Lags")
+print("✓ LITERATURE SUPPORT:")
+print("  - Hsiang & Meng (2015): Weather shocks on economic activity")
+print("  - Dell et al. (2014): Climate effects on agriculture")
+print("  - Cashin et al. (2017): Weather impacts on commodity prices")
+print("\n✓ EXPECTED STRENGTH:")
+print("  - WHEAT: F-stat > 30 (STRONG - direct El Niño → drought effect)")
+print("  - RICE: F-stat > 25 (STRONG - monsoon patterns)")
+print("  - OIL: F-stat 15-25 (MODERATE - weather affects some production)")
+print("  - COPPER: F-stat 10-20 (MODERATE - mining disruptions)")
+print("\n✓ IDENTIFICATION ASSUMPTION:")
+print("  Weather shocks affect sectoral IIP ONLY through commodity prices,")
+print("  not through direct effects on Indian manufacturing.")
+print("="*70)
+================================================================================
+
+--- Code Cell 27 ---
+# 1. Strong El Niño/La Niña Binary Indicators
+masterDF['oni_strong_elnino'] = (masterDF['ONI'] > 1.5).astype(int)
+masterDF['oni_strong_lanina'] = (masterDF['ONI'] < -1.5).astype(int)
+masterDF['oni_extreme'] = (masterDF['ONI'].abs() > 1.5).astype(int)
+
+print("\n[Binary ENSO Indicators:")
+print(f"  • Strong El Niño (ONI > 1.5): {masterDF['oni_strong_elnino'].sum():,} observations")
+print(f"  • Strong La Niña (ONI < -1.5): {masterDF['oni_strong_lanina'].sum():,} observations")
+print(f"  • Extreme ENSO (|ONI| > 1.5): {masterDF['oni_extreme'].sum():,} observations")
+================================================================================
+
+--- Code Cell 28 ---
+# 2. Standardized ONI (Z-scores for easier interpretation)
+masterDF['oni_standardized'] = (masterDF['ONI'] - masterDF['ONI'].mean()) / masterDF['ONI'].std()
+
+# 3. Non-linear transformations
+masterDF['oni_squared'] = masterDF['ONI'] ** 2
+masterDF['oni_abs'] = masterDF['ONI'].abs()
+
+# 4. Standardized lags
+masterDF['oni_lag3_standardized'] = (masterDF['ONI_lag_3m'] - masterDF['ONI_lag_3m'].mean()) / masterDF['ONI_lag_3m'].std()
+masterDF['oni_lag6_standardized'] = (masterDF['ONI_lag_6m'] - masterDF['ONI_lag_6m'].mean()) / masterDF['ONI_lag_6m'].std()
+
+print("\n[2] Continuous Instrument Variations:")
+print("  • oni_standardized (Z-score)")
+print("  • oni_squared (non-linear effects)")
+print("  • oni_abs (intensity)")
+print("  • oni_lag3_standardized, oni_lag6_standardized")
+================================================================================
+
+--- Code Cell 29 ---
+# 5. Interaction with sector characteristics (for robustness)
+if 'is_energy_intensive' in masterDF.columns:
+    masterDF['oni_x_energy'] = masterDF['ONI'] * masterDF['is_energy_intensive'].astype(int)
+    print("\n[3] Interaction Terms:")
+    print("  • oni_x_energy (ONI × energy-intensive sectors)")
+# Summary: Industry Summary
+instrument_vars = ['ONI', 'ONI_lag_1m', 'ONI_lag_3m', 'ONI_lag_6m',
+                   'oni_strong_elnino', 'oni_strong_lanina', 'oni_standardized']
+
+for var in instrument_vars:
+    if var in masterDF.columns:
+        non_null = masterDF[var].notna().sum()
+        print(f"  {var}: {non_null:,} non-null observations")
+================================================================================
+
+--- Code Cell 31 ---
+# Get unique dates (ONI is same for all sectors on given date)
+oni_timeseries = masterDF.groupby('date')[['ONI', 'ENSO_Phase']].first().reset_index()
+oni_timeseries = oni_timeseries.sort_values('date')
+
+fig, axes = plt.subplots(2, 1, figsize=(15, 10))
+
+# ============================================================================
+# Plot 1: ONI Time Series with ENSO Phases
+# ============================================================================
+
+ax1 = axes[0]
+
+# Plot ONI line
+ax1.plot(oni_timeseries['date'], oni_timeseries['ONI'], 
+         linewidth=2, color='navy', label='ONI Index', zorder=3)
+
+# Add threshold lines
+ax1.axhline(y=0, color='black', linestyle='-', linewidth=1, alpha=0.5)
+ax1.axhline(y=0.5, color='red', linestyle='--', linewidth=1, alpha=0.5)
+ax1.axhline(y=-0.5, color='blue', linestyle='--', linewidth=1, alpha=0.5)
+... [truncated] ...
+================================================================================
+
+--- Code Cell 32 ---
+# Print statistics
+print("ONI INSTRUMENT CHARACTERISTICS (2012-2024)\n\n")
+print(f"Total months: {len(oni_timeseries):,}")
+print(f"Mean ONI: {oni_timeseries['ONI'].mean():.2f}")
+print(f"Std Dev: {oni_timeseries['ONI'].std():.2f}")
+print(f"\nEl Niño months (ONI > 0.5): {(oni_timeseries['ONI'] > 0.5).sum()} ({(oni_timeseries['ONI'] > 0.5).sum() / len(oni_timeseries) * 100:.1f}%)")
+print(f"La Niña months (ONI < -0.5): {(oni_timeseries['ONI'] < -0.5).sum()} ({(oni_timeseries['ONI'] < -0.5).sum() / len(oni_timeseries) * 100:.1f}%)")
+print(f"Neutral months: {((oni_timeseries['ONI'] >= -0.5) & (oni_timeseries['ONI'] <= 0.5)).sum()}")
+print(f"\nStrongest El Niño: {oni_timeseries['ONI'].max():.2f} ({oni_timeseries.loc[oni_timeseries['ONI'].idxmax(), 'date'].strftime('%b %Y')})")
+print(f"Strongest La Niña: {oni_timeseries['ONI'].min():.2f} ({oni_timeseries.loc[oni_timeseries['ONI'].idxmin(), 'date'].strftime('%b %Y')})")
+================================================================================
+
+--- Code Cell 34 ---
+# Aggregate to monthly level
+monthly_data = masterDF.groupby('date').agg({
+    'ONI': 'first',
+    'ONI_lag_1m': 'first',
+    'ONI_lag_3m': 'first',
+    'ONI_lag_6m': 'first',
+    'CRUDE_PETRO': 'mean',
+    'WHEAT_US_HRW': 'mean',
+    'RICE_05': 'mean',
+    'COPPER': 'mean'
+}).dropna().reset_index()
+================================================================================
+
+--- Code Cell 35 ---
+# Calculate correlations
+# Naive Correlations (NOT causal, just relevance check)
+
+
+correlations = {}
+correlations['Oil (ONI current)'] = monthly_data[['ONI', 'CRUDE_PETRO']].corr().iloc[0, 1]
+correlations['Oil (ONI lag 3m)'] = monthly_data[['ONI_lag_3m', 'CRUDE_PETRO']].corr().iloc[0, 1]
+correlations['Wheat (ONI lag 3m)'] = monthly_data[['ONI_lag_3m', 'WHEAT_US_HRW']].corr().iloc[0, 1]
+correlations['Rice (ONI lag 3m)'] = monthly_data[['ONI_lag_3m', 'RICE_05']].corr().iloc[0, 1]
+correlations['Copper (ONI lag 6m)'] = monthly_data[['ONI_lag_6m', 'COPPER']].corr().iloc[0, 1]
+
+for commodity, corr in correlations.items():
+    print(f"  {commodity:30s}: r = {corr:6.3f}")
+
+print("\nAll correlations are non-zero (good for instrument relevance)")
+print("Formal test in first-stage: F-statistic > 10")
+================================================================================
+
+--- Code Cell 36 ---
+# Create scatter plots
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# Helper function for scatter plot
+def create_scatter(ax, x_data, y_data, x_label, y_label, title, color):
+    # Remove NaN
+    mask = ~(np.isnan(x_data) | np.isnan(y_data))
+    x_clean = x_data[mask]
+    y_clean = y_data[mask]
+    
+    ax.scatter(x_clean, y_clean, alpha=0.5, s=40, color=color, edgecolors='black', linewidth=0.5)
+    
+    # Fit line
+    z = np.polyfit(x_clean, y_clean, 1)
+    p = np.poly1d(z)
+    x_sorted = np.sort(x_clean)
+    ax.plot(x_sorted, p(x_sorted), "r--", linewidth=2, label='Linear fit')
+    
+    ax.set_xlabel(x_label, fontsize=11, fontweight='bold')
+    ax.set_ylabel(y_label, fontsize=11, fontweight='bold')
+... [truncated] ...
+================================================================================
+
+--- Code Cell 39 ---
+# Step 1: Filter to manufacturing sectors only
+# Remove aggregate/non-manufacturing categories
+exclude_sectors = ['General Index', 'Manufacturing', 'Mining', 'Electricity',
+                   'Primary Goods', 'Capital Goods', 'Intermediate Goods',
+                   'Infrastructure Goods', 'Consumer Durables', 'Consumer Non-Durables']
+
+iv_data = masterDF[~masterDF['sector_name'].isin(exclude_sectors)].copy()
+
+print(f"  Original observations: {len(masterDF):,}")
+print(f"  After filtering: {len(iv_data):,}")
+print(f"  Unique sectors: {iv_data['sector_name'].nunique()}")
+print(f"  Sectors removed: {len(masterDF) - len(iv_data):,}")
+================================================================================
+
+--- Code Cell 40 ---
+# Step 2: Filter date range
+print("\n date range...")
+iv_data = iv_data[(iv_data['date'] >= '2012-04-01') & (iv_data['date'] <= '2024-12-31')]
+print(f"  Date range: {iv_data['date'].min()} to {iv_data['date'].max()}")
+print(f"  Observations: {len(iv_data):,}")
+================================================================================
+
+--- Code Cell 41 ---
+# Step 3: Check for missing values in key variables
+print("\n[3] Checking missing values in key variables...")
+
+key_vars = ['iip_yoy_growth', 'CRUDE_PETRO', 'WHEAT_US_HRW', 'RICE_05',
+            'ONI', 'ONI_lag_3m', 'gdp_growth_yoy', 'backward_linkage', 'forward_linkage']
+
+missing_summary = pd.DataFrame({
+    'Variable': key_vars,
+    'Missing': [iv_data[var].isnull().sum() if var in iv_data.columns else len(iv_data) for var in key_vars],
+    'Missing %': [(iv_data[var].isnull().sum() / len(iv_data) * 100) if var in iv_data.columns else 100.0 for var in key_vars]
+})
+
+print(missing_summary.to_string(index=False))
+================================================================================
+
+--- Code Cell 42 ---
+# Step 4: Drop rows with missing critical variables
+print("\n[4] Handling missing values...")
+
+critical_vars = ['iip_yoy_growth', 'ONI', 'ONI_lag_3m', 'sector_name', 'date', 
+                  'CRUDE_PETRO', 'WHEAT_US_HRW', 'RICE_05']
+
+before_drop = len(iv_data)
+iv_data = iv_data.dropna(subset=critical_vars)
+after_drop = len(iv_data)
+
+print(f"  Dropped {before_drop - after_drop:,} rows with missing critical variables")
+print(f"  Remaining observations: {after_drop:,}")
+================================================================================
+
+--- Code Cell 43 ---
+# Step 5: Create dummy variables for fixed effects
+print("\n Creating fixed effects...")
+
+# Sector dummies (don't drop first - we'll use it in regression formula with C())
+iv_data['sector_id'] = pd.Categorical(iv_data['sector_name']).codes
+print(f"  Created sector_id: {iv_data['sector_id'].nunique()} unique sectors")
+
+# Extract year and month
+iv_data['year'] = iv_data['date'].dt.year
+iv_data['month'] = iv_data['date'].dt.month
+
+print(f"  Year range: {iv_data['year'].min()} - {iv_data['year'].max()}")
+print(f"  Months: 1-12")
+================================================================================
+
+--- Code Cell 44 ---
+# Step 6: Summary statistics
+print("\nFinal dataset summary:")
+print(f"  Total observations: {len(iv_data):,}")
+print(f"  Sectors: {iv_data['sector_name'].nunique()}")
+print(f"  Time periods: {iv_data['date'].nunique()} months")
+print(f"  Date range: {iv_data['date'].min().strftime('%Y-%m')} to {iv_data['date'].max().strftime('%Y-%m')}")
+
+# Check balance
+obs_per_sector = iv_data.groupby('sector_name').size()
+print(f"\n  Observations per sector:")
+print(f"    Min: {obs_per_sector.min()}")
+print(f"    Max: {obs_per_sector.max()}")
+print(f"    Mean: {obs_per_sector.mean():.1f}")
+================================================================================
+
+--- Code Cell 45 ---
+# Step 7: Save prepared dataset
+iv_data_path = figures_path + 'iv_regression_data.csv'
+iv_data.to_csv(iv_data_path, index=False)
+print(f"\n✓ IV regression dataset saved: {iv_data_path}")
+
+print("DATASET READY FOR FIRST-STAGE REGRESSIONS")
+================================================================================
+
+--- Code Cell 48 ---
+# FIRST-STAGE REGRESSION: ONI → WHEAT PRICE
+
+# Select relevant variables
+fs_wheat_vars = ['WHEAT_US_HRW', 'ONI', 'ONI_lag_1m', 'ONI_lag_3m', 
+                 'gdp_growth_yoy', 'backward_linkage', 'year', 'month']
+
+fs_wheat = iv_data[fs_wheat_vars].copy()
+fs_wheat = fs_wheat.dropna()
+
+print(f"  Observations: {len(fs_wheat):,}")
+print(f"  Date range: {len(fs_wheat)} observations")
+================================================================================
+
+--- Code Cell 49 ---
+# Method 1: Using formula API (handles categorical automatically)
+print("\n[Estimating first-stage model...]")
+
+# Create formula with fixed effects
+formula_wheat = 'WHEAT_US_HRW ~ ONI + ONI_lag_3m + gdp_growth_yoy + backward_linkage + C(year) + C(month)'
+
+# Fit model
+first_stage_wheat = smf.ols(formula=formula_wheat, data=fs_wheat).fit()
+
+# Print results
+print("FIRST-STAGE RESULTS: WHEAT PRICE")
+print(first_stage_wheat.summary())
+================================================================================
+
+--- Code Cell 50 ---
+# Extract key statistics
+f_stat = first_stage_wheat.fvalue
+r_squared = first_stage_wheat.rsquared
+oni_coef = first_stage_wheat.params['ONI']
+oni_pval = first_stage_wheat.pvalues['ONI']
+oni_lag3_coef = first_stage_wheat.params['ONI_lag_3m']
+oni_lag3_pval = first_stage_wheat.pvalues['ONI_lag_3m']
+
+print("KEY STATISTICS:\n\n")
+print(f"F-statistic (overall): {f_stat:.2f}")
+print(f"R-squared: {r_squared:.4f}")
+print(f"Observations: {first_stage_wheat.nobs:.0f}")
+print(f"\nInstrument Coefficients:")
+print(f"  ONI:        {oni_coef:8.3f}  (t = {oni_coef/first_stage_wheat.bse['ONI']:6.2f}, p = {oni_pval:.4f})")
+print(f"  ONI_lag_3m: {oni_lag3_coef:8.3f}  (t = {oni_lag3_coef/first_stage_wheat.bse['ONI_lag_3m']:6.2f}, p = {oni_lag3_pval:.4f})")
+
+================================================================================
+
+--- Code Cell 51 ---
+# Test for weak instruments
+print("WEAK INSTRUMENT TEST")
+
+if f_stat > 10:
+    print(f"STRONG INSTRUMENT: F-stat = {f_stat:.2f} > 10")
+    print("    Passes Stock & Yogo (2005) weak instrument threshold")
+    instrument_strength = "STRONG"
+elif f_stat > 5:
+    print(f"MODERATE INSTRUMENT: F-stat = {f_stat:.2f}")
+    print("    Above 5 but below 10 - acceptable but not ideal")
+    instrument_strength = "MODERATE"
+else:
+    print(f"WEAK INSTRUMENT: F-stat = {f_stat:.2f} < 5")
+    print("    May cause bias in 2SLS estimates")
+    instrument_strength = "WEAK"
+================================================================================
+
+--- Code Cell 52 ---
+# Interpretation
+print("ECONOMIC INTERPRETATION:")
+
+if oni_coef > 0:
+    print(f"A 1-unit increase in ONI (shift toward El Niño) increases")
+    print(f"wheat prices by ${oni_coef:.2f} per metric ton.")
+    print("\nThis is EXPECTED: El Niño → droughts → lower wheat supply → higher prices")
+else:
+    print(f"A 1-unit increase in ONI decreases wheat prices by ${abs(oni_coef):.2f}/MT")
+    print("\nThis is UNEXPECTED but may reflect complex regional effects")
+
+if oni_lag3_coef > 0:
+    print(f"\nWith a 3-month lag, the effect is ${oni_lag3_coef:.2f}/MT")
+    print("Lag effects capture delayed transmission through agricultural cycles")
+
+# Save fitted values (instrumented wheat price)
+fs_wheat['WHEAT_US_HRW_hat'] = first_stage_wheat.fittedvalues
+
+print("\nInstrumented wheat price created: WHEAT_US_HRW_hat")
+
+... [truncated] ...
+================================================================================
+
+--- Code Cell 54 ---
+# Prepare data
+fs_oil_vars = ['CRUDE_PETRO', 'ONI', 'ONI_lag_3m', 'ONI_lag_6m',
+               'gdp_growth_yoy', 'forward_linkage', 'year', 'month']
+
+fs_oil = iv_data[fs_oil_vars].copy()
+fs_oil = fs_oil.dropna()
+
+print(f"  Observations: {len(fs_oil):,}")
+================================================================================
+
+--- Code Cell 55 ---
+# Estimate model
+print("\n[Estimating first-stage model...]")
+formula_oil = 'CRUDE_PETRO ~ ONI + ONI_lag_3m + ONI_lag_6m + gdp_growth_yoy + forward_linkage + C(year) + C(month)'
+first_stage_oil = smf.ols(formula=formula_oil, data=fs_oil).fit()
+
+# Print results
+print("FIRST-STAGE RESULTS: OIL PRICE")
+print(first_stage_oil.summary())
+================================================================================
+
+--- Code Cell 56 ---
+# Extract statistics
+f_stat_oil = first_stage_oil.fvalue
+r_squared_oil = first_stage_oil.rsquared
+oni_coef_oil = first_stage_oil.params['ONI']
+oni_pval_oil = first_stage_oil.pvalues['ONI']
+
+
+print("KEY STATISTICS")
+
+print(f"F-statistic (overall): {f_stat_oil:.2f}")
+print(f"R-squared: {r_squared_oil:.4f}")
+print(f"Observations: {first_stage_oil.nobs:.0f}")
+print(f"\nONI coefficient: {oni_coef_oil:.3f} (p = {oni_pval_oil:.4f})")
+================================================================================
+
+--- Code Cell 57 ---
+# Weak instrument test
+
+print("WEAK INSTRUMENT TEST")
+
+if f_stat_oil > 10:
+    print(f"STRONG INSTRUMENT: F-stat = {f_stat_oil:.2f} > 10")
+    strength_oil = "STRONG"
+elif f_stat_oil > 5:
+    print(f"MODERATE INSTRUMENT: F-stat = {f_stat_oil:.2f}")
+    print("    Acceptable for IV estimation")
+    strength_oil = "MODERATE"
+else:
+    print(f"WEAK INSTRUMENT: F-stat = {f_stat_oil:.2f} < 5")
+    strength_oil = "WEAK"
+================================================================================
+
+--- Code Cell 58 ---
+# Interpretation
+print("ECONOMIC INTERPRETATION")
+print(f"A 1-unit ONI increase affects oil prices by ${oni_coef_oil:.2f}/barrel")
+
+if abs(oni_coef_oil) < 5:
+    print("\nWeaker effect than wheat (expected):")
+    print("  • Oil production less weather-dependent than agriculture")
+    print("  • OPEC quotas are stronger driver (not in our data)")
+    print("  • Weather mainly affects offshore drilling, some extraction")
+================================================================================
+
+--- Code Cell 59 ---
+# Save fitted values
+fs_oil['CRUDE_PETRO_hat'] = first_stage_oil.fittedvalues
+
+print("\nInstrumented oil price created: CRUDE_PETRO_hat")
+
+# Store results
+oil_first_stage_results = {
+    'commodity': 'Oil',
+    'f_stat': f_stat_oil,
+    'r_squared': r_squared_oil,
+    'oni_coef': oni_coef_oil,
+    'oni_pval': oni_pval_oil,
+    'oni_lag3_coef': first_stage_oil.params.get('ONI_lag_3m', np.nan),
+    'oni_lag3_pval': first_stage_oil.pvalues.get('ONI_lag_3m', np.nan),
+    'strength': strength_oil,
+    'n_obs': first_stage_oil.nobs
+}
+================================================================================
+
+--- Code Cell 61 ---
+# Prepare data
+fs_rice_vars = ['RICE_05', 'ONI', 'ONI_lag_3m', 'ONI_lag_6m',
+                'gdp_growth_yoy', 'backward_linkage', 'year', 'month']
+
+fs_rice = iv_data[fs_rice_vars].copy()
+fs_rice = fs_rice.dropna()
+
+print(f"  Observations: {len(fs_rice):,}")
+================================================================================
+
+--- Code Cell 62 ---
+# Estimate model
+print("\n[Estimating first-stage model...]")
+
+formula_rice = 'RICE_05 ~ ONI + ONI_lag_3m + ONI_lag_6m + gdp_growth_yoy + backward_linkage + C(year) + C(month)'
+
+first_stage_rice = smf.ols(formula=formula_rice, data=fs_rice).fit()
+
+# Print results
+print("\n" + "="*70)
+print("FIRST-STAGE RESULTS: RICE PRICE")
+print("="*70)
+print(first_stage_rice.summary())
+
+# Extract statistics
+f_stat_rice = first_stage_rice.fvalue
+r_squared_rice = first_stage_rice.rsquared
+oni_coef_rice = first_stage_rice.params['ONI']
+oni_pval_rice = first_stage_rice.pvalues['ONI']
+
+print("\n" + "="*70)
+... [truncated] ...
+================================================================================
+
+--- Code Cell 63 ---
+# ============================================================================
+# CELL 15: COMPILE FIRST-STAGE RESULTS TABLE
+# ============================================================================
+
+print("\n" + "="*70)
+print("FIRST-STAGE SUMMARY TABLE")
+print("="*70)
+
+# Compile all results
+first_stage_summary = pd.DataFrame([
+    wheat_first_stage_results,
+    oil_first_stage_results,
+    rice_first_stage_results
+])
+
+# Reorder columns
+first_stage_summary = first_stage_summary[[
+    'commodity', 'n_obs', 'f_stat', 'r_squared', 
+    'oni_coef', 'oni_pval', 'oni_lag3_coef', 'oni_lag3_pval', 'strength'
+]]
+... [truncated] ...
+================================================================================
+
+--- Code Cell 65 ---
+# ============================================================================
+# CELL 16: SECOND-STAGE 2SLS - ENERGY-INTENSIVE SECTORS
+# ============================================================================
+
+from linearmodels.iv import IV2SLS
+
+print("="*70)
+print("SECOND-STAGE 2SLS: OIL PRICE → ENERGY-INTENSIVE SECTORS")
+print("="*70)
+
+# Define energy-intensive sectors
+energy_sectors = [
+    'Manufacture of chemicals and chemical products',
+    'Manufacture of coke and refined petroleum products',
+    'Manufacture of basic metals',
+    'Manufacture of other non-metallic mineral products'
+]
+
+# Filter data
+print("\n[1] Preparing data...")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 66 ---
+# ============================================================================
+# CELL 17: SECOND-STAGE 2SLS - FOOD SECTORS
+# ============================================================================
+
+print("\n" + "="*70)
+print("SECOND-STAGE 2SLS: WHEAT PRICE → FOOD SECTORS")
+print("="*70)
+
+# Define food sectors
+food_sectors = [
+    'Manufacture of food products',
+    'Manufacture of beverages',
+    'Manufacture of tobacco products'
+]
+
+# Filter data
+print("\n[1] Preparing data...")
+ss_food = iv_data[iv_data['sector_name'].isin(food_sectors)].copy()
+print(f"  Food sectors: {len(food_sectors)}")
+print(f"  Observations: {len(ss_food):,}")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 67 ---
+# ============================================================================
+# CELL 18: SECOND-STAGE 2SLS - ALL MANUFACTURING SECTORS POOLED
+# ============================================================================
+
+print("\n" + "="*70)
+print("SECOND-STAGE 2SLS: ALL MANUFACTURING SECTORS (POOLED)")
+print("="*70)
+
+# Use all manufacturing sectors
+print("\n[1] Preparing data...")
+ss_all = iv_data.copy()
+
+ss_all_vars = ['iip_yoy_growth', 'CRUDE_PETRO', 'ONI', 'ONI_lag_3m', 
+               'gdp_growth_yoy', 'backward_linkage', 'forward_linkage',
+               'sector_name', 'year', 'month']
+ss_all = ss_all[ss_all_vars].dropna()
+
+print(f"  All manufacturing sectors: {ss_all['sector_name'].nunique()}")
+print(f"  Observations: {len(ss_all):,}")
+
+... [truncated] ...
+================================================================================
+
+--- Code Cell 68 ---
+# ============================================================================
+# CELL 19: HAUSMAN TEST - IS 2SLS NECESSARY?
+# ============================================================================
+
+print("\n" + "="*70)
+print("HAUSMAN TEST FOR ENDOGENEITY")
+print("="*70)
+
+print("\nTests whether commodity prices are endogenous")
+print("Null hypothesis: OLS is consistent (no endogeneity)")
+print("Alternative: Endogeneity exists, use 2SLS\n")
+
+# Test for energy sectors
+print("\n[1] Energy-Intensive Sectors (Oil Price):")
+print("-"*70)
+
+# Run OLS (treating oil as exogenous)
+from statsmodels.regression.linear_model import OLS
+import statsmodels.api as sm
+
+... [truncated] ...
+================================================================================
+
+--- Code Cell 69 ---
+# ============================================================================
+# CELL 20: SARGAN-HANSEN J-TEST FOR OVERIDENTIFICATION
+# ============================================================================
+
+print("\n" + "="*70)
+print("SARGAN-HANSEN J-TEST (Overidentification Test)")
+print("="*70)
+
+print("\nTests whether instruments are valid (exogenous)")
+print("Null hypothesis: All instruments are valid")
+print("Alternative: At least one instrument is invalid\n")
+
+# Note: This test only works when you have MORE instruments than endogenous variables
+# We have 2 instruments (ONI, ONI_lag_3m) for 1 endogenous variable (price)
+# So we are OVERIDENTIFIED and can run this test
+
+print("\n[1] Energy Sectors (Oil Price):")
+print("-"*70)
+
+# The IV2SLS model object has a method for this
+... [truncated] ...
+================================================================================
+
+--- Code Cell 70 ---
+# ============================================================================
+# CELL 21: ROBUSTNESS CHECK - PRE/POST 2015 SUBSAMPLE
+# ============================================================================
+
+print("\n" + "="*70)
+print("ROBUSTNESS CHECK: PRE/POST 2015 SPLIT")
+print("="*70)
+
+print("\nRationale: I-O table is from 2015-16")
+print("Test if structural changes affect results\n")
+
+# Split data
+ss_energy_pre2015 = ss_energy[ss_energy['year'] < 2015].copy()
+ss_energy_post2015 = ss_energy[ss_energy['year'] >= 2015].copy()
+
+print(f"Pre-2015 observations:  {len(ss_energy_pre2015):,}")
+print(f"Post-2015 observations: {len(ss_energy_post2015):,}")
+
+# Estimate on pre-2015
+print("\n[1] PRE-2015 (2012-2014):")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 71 ---
+# ============================================================================
+# CELL 22: ROBUSTNESS CHECK - ALTERNATIVE INSTRUMENT SPECIFICATIONS
+# ============================================================================
+
+print("\n" + "="*70)
+print("ROBUSTNESS CHECK: ALTERNATIVE INSTRUMENT SPECIFICATIONS")
+print("="*70)
+
+# Test 1: Use only ONI (no lag)
+print("\n[1] Instrument: ONI only (no lags):")
+print("-"*70)
+
+instruments_alt1 = ss_energy[['ONI']]
+
+model_alt1 = IV2SLS(dependent=dependent,
+                    exog=exogenous,
+                    endog=endogenous,
+                    instruments=instruments_alt1).fit(cov_type='clustered',
+                                                      clusters=ss_energy['sector_id'])
+
+... [truncated] ...
+================================================================================
+
+--- Code Cell 72 ---
+# ============================================================================
+# CELL 23: COMPILE SECOND-STAGE RESULTS TABLE
+# ============================================================================
+
+print("="*70)
+print("SECOND-STAGE 2SLS RESULTS COMPILATION")
+print("="*70)
+OUTPUT_PATH = "./outputs_sprint2/"
+# Compile all second-stage results
+second_stage_summary = pd.DataFrame([
+    energy_2sls_results,
+    food_2sls_results,
+    all_2sls_results
+])
+
+# Reorder and format columns
+second_stage_summary = second_stage_summary[[
+    'sector_group', 'commodity', 'n_obs', 'beta', 'se', 
+    't_stat', 'pval', 'r_squared'
+]]
+... [truncated] ...
+================================================================================
+
+--- Code Cell 73 ---
+# ============================================================================
+# CELL 24: VISUALIZATION - COEFFICIENT PLOTS WITH CONFIDENCE INTERVALS
+# ============================================================================
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+print("="*70)
+print("CREATING COEFFICIENT VISUALIZATIONS")
+print("="*70)
+
+# ============================================================================
+# Plot 1: Second-Stage Coefficients with 95% CI
+# ============================================================================
+
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Prepare data
+sector_groups = second_stage_summary['sector_group'].tolist()
+betas = second_stage_summary['beta'].values
+... [truncated] ...
+================================================================================
+
+--- Code Cell 74 ---
+# ============================================================================
+# CELL 25: FINAL IV ANALYSIS SUMMARY & DOCUMENTATION
+# ============================================================================
+
+print("="*70)
+print("IV ANALYSIS COMPLETE - FINAL SUMMARY")
+print("="*70)
+
+# ============================================================================
+# Part 1: Summary Statistics
+# ============================================================================
+
+print("\n" + "="*70)
+print("SUMMARY STATISTICS")
+print("="*70)
+
+print("\n[Dataset]")
+print(f"  Total observations: {len(iv_data):,}")
+print(f"  Sectors analyzed: {iv_data['sector_name'].nunique()}")
+print(f"  Time period: {iv_data['date'].min().strftime('%b %Y')} to {iv_data['date'].max().strftime('%b %Y')}")
+... [truncated] ...
+================================================================================
+
+--- Code Cell 75 ---
+# ============================================================================
+# DIAGNOSTIC: WHAT CELLS DO I ACTUALLY HAVE?
+# ============================================================================
+
+import json
+
+# Count cells in current notebook
+print("="*70)
+print("NOTEBOOK CONTENTS INVENTORY")
+print("="*70)
+
+# If running in Jupyter, this will show cell count
+# Otherwise, manually count your cells
+
+cell_titles = []
+
+print("\nCells I can see in my notebook:")
+print("-"*70)
+
+# List out your cell titles manually
+... [truncated] ...
+================================================================================
+
