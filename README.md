@@ -411,9 +411,33 @@ All outputs will be saved to `data/processed/` and `data/processed_io_data/`.
 
 ---
 
-## Team
+## Contributors
 
-1. **Aaron Thomas Mathew**: [https://github.com/aaronmat1905](https://github.com/aaronmat1905)
-2. **Akarsh T**: [https://github.com/Akarsh8T](https://github.com/Akarsh8T)
-3. **Anirudh Krishnan**: [https://github.com/Anirudh553](https://github.com/Anirudh553)
-4. **Preetham VJ**: [https://github.com/PreethamVJ](https://github.com/PreethamVJ)
+- **Aaron Thomas Mathew** - [GitHub](https://github.com/aaronmat1905)
+- **Akarsh T** - [GitHub](https://github.com/Akarsh8T)
+- **Anirudh Krishnan** - [GitHub](https://github.com/Anirudh553)
+- **Preetham VJ** - [GitHub](https://github.com/PreethamVJ)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+This research was conducted as part of the ADA Course Project (UE23AM343AB1). We acknowledge the following data sources:
+- World Bank Commodity Price Data (Pink Sheet)
+- UN Comtrade Database
+- Ministry of Statistics and Programme Implementation (MOSPI), Government of India
+- Reserve Bank of India
+- OECD Statistics
+
+## Citation
+
+If you use this code or data in your research, please cite:
+
+```
+Mathew, A.T., Akarsh, T., Krishnan, A., & Preetham, V.J. (2025).
+Global Commodity Shocks, International Trade Linkages, and Economic Resilience:
+Causal Impacts and Predictive Modelling of Sectoral Stress.
+ADA Course Project, UE23AM343AB1.
+```
