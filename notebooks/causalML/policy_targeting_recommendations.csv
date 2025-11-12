@@ -1,0 +1,23 @@
+sector_name,Rank,CATE_mean,CATE_std,Vulnerability,Policy_Benefit,Benefit_Rank
+Other manufacturing,1,0.261,1.034,HIGH,0.12368181818181823,1.0
+Manufacture of tobacco products,2,0.319,0.863,HIGH,0.09468181818181823,2.0
+Manufacture of electrical equipment,3,0.369,0.815,HIGH,0.06968181818181823,3.0
+Manufacture of furniture,4,0.388,0.75,HIGH,0.060181818181818225,4.0
+Manufacture of beverages,5,0.421,0.604,HIGH,0.04368181818181824,5.0
+Printing and reproduction of recorded media,6,0.437,0.673,HIGH,0.03568181818181823,6.0
+Manufacture of wearing apparel,7,0.442,0.864,HIGH,0.03318181818181823,7.0
+Manufacture of leather and related products,8,0.475,0.64,MEDIUM,0.016681818181818242,8.0
+Manufacture of other transport equipment,9,0.488,0.669,MEDIUM,0.010181818181818236,9.0
+Manufacture of textiles,10,0.51,0.616,MEDIUM,-0.0008181818181817735,10.0
+Manufacture of paper and paper products,11,0.525,0.652,MEDIUM,-0.00831818181818178,11.0
+Manufacture of rubber and plastics products,12,0.539,0.571,MEDIUM,-0.015318181818181786,12.0
+Manufacture of coke and refined petroleum products,13,0.553,0.488,MEDIUM,-0.022318181818181793,13.0
+"Manufacture of fabricated metal products, except machinery and equipment",14,0.567,0.667,MEDIUM,-0.029318181818181743,14.0
+Manufacture of chemicals and chemical products,15,0.571,0.476,LOW,-0.031318181818181745,15.5
+"Manufacture of computer, electronic and optical products",16,0.571,0.76,LOW,-0.031318181818181745,15.5
+Manufacture of machinery and equipment n.e.c.,17,0.597,0.66,LOW,-0.04431818181818176,17.0
+Manufacture of food products,18,0.598,0.51,LOW,-0.04481818181818176,18.0
+Manufacture of other non-metallic mineral products,19,0.622,0.55,LOW,-0.05681818181818177,19.0
+"Manufacture of motor vehicles, trailers and semi-trailers",20,0.631,0.644,LOW,-0.06131818181818177,20.0
+"Manufacture of pharmaceuticals, medicinal chemical and botanical products",21,0.641,0.656,LOW,-0.06631818181818178,21.0
+Manufacture of basic metals,22,0.659,0.586,LOW,-0.07531818181818178,22.0

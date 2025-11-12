@@ -1,0 +1,6 @@
+Epic 2.6 completed on: 2025-11-12 23:52:36
+Total sectors analyzed: 22
+High vulnerability sectors: 7
+Methods used: DML, T-Learner, S-Learner, X-Learner
+Ensemble mean CATE: 0.508%
+CATE range: [-3.057%, 2.327%]

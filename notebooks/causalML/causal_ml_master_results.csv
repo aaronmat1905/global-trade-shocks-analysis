@@ -1,0 +1,23 @@
+sector_name,CATE_mean,CATE_std,CATE_min,CATE_max,n_obs,IIP_avg,Vulnerability,Rank,Policy_Benefit,Benefit_Rank,top_heterogeneity_driver
+Other manufacturing,0.261,1.034,-2.985,1.969,145,-0.433,HIGH,1,0.12368181818181823,1.0,iip_yoy_growth_lag1
+Manufacture of tobacco products,0.319,0.863,-2.851,1.927,144,-0.186,HIGH,2,0.09468181818181823,2.0,iip_yoy_growth_lag1
+Manufacture of electrical equipment,0.369,0.815,-3.057,1.993,145,2.689,HIGH,3,0.06968181818181823,3.0,iip_yoy_growth_lag1
+Manufacture of furniture,0.388,0.75,-2.852,1.722,144,7.804,HIGH,4,0.060181818181818225,4.0,iip_yoy_growth_lag1
+Manufacture of beverages,0.421,0.604,-2.851,1.534,145,1.683,HIGH,5,0.04368181818181824,5.0,iip_yoy_growth_lag1
+Printing and reproduction of recorded media,0.437,0.673,-2.815,1.544,145,0.578,HIGH,6,0.03568181818181823,6.0,iip_yoy_growth_lag1
+Manufacture of wearing apparel,0.442,0.864,-2.983,2.172,145,4.32,HIGH,7,0.03318181818181823,7.0,iip_yoy_growth_lag1
+Manufacture of leather and related products,0.475,0.64,-2.807,1.55,144,-0.634,MEDIUM,8,0.016681818181818242,8.0,iip_yoy_growth_lag1
+Manufacture of other transport equipment,0.488,0.669,-2.851,1.83,144,5.409,MEDIUM,9,0.010181818181818236,9.0,iip_yoy_growth_lag1
+Manufacture of textiles,0.51,0.616,-2.778,1.915,145,0.58,MEDIUM,10,-0.0008181818181817735,10.0,iip_yoy_growth_lag1
+Manufacture of paper and paper products,0.525,0.652,-2.751,1.97,145,-1.321,MEDIUM,11,-0.00831818181818178,11.0,iip_yoy_growth_lag1
+Manufacture of rubber and plastics products,0.539,0.571,-2.751,1.724,145,1.447,MEDIUM,12,-0.015318181818181786,12.0,iip_yoy_growth_lag1
+Manufacture of coke and refined petroleum products,0.553,0.488,-2.025,1.952,145,2.455,MEDIUM,13,-0.022318181818181793,13.0,iip_yoy_growth_lag1
+"Manufacture of fabricated metal products, except machinery and equipment",0.567,0.667,-2.774,1.902,145,1.385,MEDIUM,14,-0.029318181818181743,14.0,iip_yoy_growth_lag1
+Manufacture of chemicals and chemical products,0.571,0.476,-2.751,1.577,145,2.12,LOW,15,-0.031318181818181745,15.5,iip_yoy_growth_lag1
+"Manufacture of computer, electronic and optical products",0.571,0.76,-2.769,2.327,145,4.299,LOW,16,-0.031318181818181745,15.5,iip_yoy_growth_lag1
+Manufacture of machinery and equipment n.e.c.,0.597,0.66,-2.769,2.0,145,2.79,LOW,17,-0.04431818181818176,17.0,iip_yoy_growth_lag1
+Manufacture of food products,0.598,0.51,-1.817,2.004,145,2.474,LOW,18,-0.04481818181818176,18.0,iip_yoy_growth_lag1
+Manufacture of other non-metallic mineral products,0.622,0.55,-2.807,2.244,145,3.369,LOW,19,-0.05681818181818177,19.0,iip_yoy_growth_lag1
+"Manufacture of motor vehicles, trailers and semi-trailers",0.631,0.644,-2.77,2.008,144,3.498,LOW,20,-0.06131818181818177,20.0,iip_yoy_growth_lag1
+"Manufacture of pharmaceuticals, medicinal chemical and botanical products",0.641,0.656,-2.769,2.269,145,7.842,LOW,21,-0.06631818181818178,21.0,iip_yoy_growth_lag1
+Manufacture of basic metals,0.659,0.586,-2.751,2.32,145,6.671,LOW,22,-0.07531818181818178,22.0,iip_yoy_growth_lag1

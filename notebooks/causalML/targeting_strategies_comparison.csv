@@ -1,0 +1,5 @@
+Strategy,N_Sectors,Total_Benefit,Avg_Benefit_per_Sector,Efficiency
+Top 5,5,0.392,0.078,0.078
+Top 10,10,0.487,0.049,0.049
+High Vuln,7,0.461,0.066,0.066
+High + Med,14,0.412,0.029,0.029
