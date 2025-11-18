@@ -1,15 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tree:*)",
-      "Bash(dir:*)",
-      "Bash(python:*)",
-      "Bash(sed:*)",
-      "Bash(done)",
-      "Bash(for nb in s2_*.ipynb)",
-      "Bash(if [ -s \"$nb\" ])",
-      "Bash(then python3 -c \"import json; f=open(''$nb''); d=json.load(f); cells=d.get(''cells'',[]); mc=[c for c in cells if c[''cell_type'']==''markdown'']; cc=[c for c in cells if c[''cell_type'']==''code'']; print(f''Total: {len(cells)}, Code: {len(cc)}, Markdown: {len(mc)}'')\")",
-      "Bash(fi)"
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Trade Network - 3D Interactive Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #0ea5e9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .title-section h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* Main Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1920px;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar h2 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .control-group select,
+        .control-group input[type="text"] {
+            width: 100%;
+            padding: 0.625rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-group select:focus,
+        .control-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--dark-bg);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-item:hover {
+            background: var(--border-color);
+        }
+
+        .toggle-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        #networkPlot {
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Right Sidebar - Stats */
+        .stats-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-panel h2 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        .metric-bar {
+            margin-bottom: 1rem;
+        }
+
+        .metric-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .metric-name {
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--dark-bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Node Info Panel */
+        .node-info {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .node-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .dashboard-container {
+                grid-template-columns: 280px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .sidebar,
+            .stats-panel {
+                max-height: 300px;
+            }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="title-section">
+                    <h1>Global Trade Network Analysis</h1>
+                    <p class="subtitle">3D Interactive Visualization Dashboard</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="resetView()">
+                    <i class="fas fa-redo"></i>
+                    Reset View
+                </button>
+                <button class="btn btn-primary" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    Export Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container">
+        <!-- Left Sidebar - Controls -->
+        <aside class="sidebar">
+            <h2><i class="fas fa-sliders-h"></i> Visualization Controls</h2>
+
+            <div class="control-group">
+                <label for="layoutType">Network Layout</label>
+                <select id="layoutType" onchange="updateLayout()">
+                    <option value="3d">3D Force-Directed</option>
+                    <option value="circular">Circular Layout</option>
+                    <option value="hierarchical">Hierarchical</option>
+                    <option value="radial">Radial</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="nodeSize">Node Size: <span id="nodeSizeValue">8</span></label>
+                <input type="range" id="nodeSize" min="2" max="20" value="8" oninput="updateNodeSize(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="edgeWidth">Edge Width: <span id="edgeWidthValue">0.5</span></label>
+                <input type="range" id="edgeWidth" min="0.1" max="5" step="0.1" value="0.5" oninput="updateEdgeWidth(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="edgeOpacity">Edge Opacity: <span id="edgeOpacityValue">0.3</span></label>
+                <input type="range" id="edgeOpacity" min="0" max="1" step="0.1" value="0.3" oninput="updateEdgeOpacity(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="colorScheme">Color Scheme</label>
+                <select id="colorScheme" onchange="updateColorScheme()">
+                    <option value="default">Default</option>
+                    <option value="sector">By Sector</option>
+                    <option value="centrality">By Centrality</option>
+                    <option value="community">By Community</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="filterNodes">Filter Nodes</label>
+                <input type="text" id="filterNodes" placeholder="Search nodes..." oninput="filterNodes(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label>Display Options</label>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <label for="showLabels">Node Labels</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showLabels" checked onchange="toggleLabels()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="showEdges">Show Edges</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showEdges" checked onchange="toggleEdges()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="showGrid">Grid Lines</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showGrid" onchange="toggleGrid()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="autoRotate">Auto Rotate</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoRotate" onchange="toggleAutoRotate()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2><i class="fas fa-project-diagram"></i> Network Visualization</h2>
+                <div class="view-controls">
+                    <button class="view-btn active tooltip" onclick="setView('3d')">
+                        <i class="fas fa-cube"></i>
+                        <span class="tooltiptext">3D View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('top')">
+                        <i class="fas fa-arrows-alt-v"></i>
+                        <span class="tooltiptext">Top View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('side')">
+                        <i class="fas fa-arrows-alt-h"></i>
+                        <span class="tooltiptext">Side View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('front')">
+                        <i class="fas fa-eye"></i>
+                        <span class="tooltiptext">Front View</span>
+                    </button>
+                </div>
+            </div>
+            <div id="networkPlot"></div>
+        </main>
+
+        <!-- Right Sidebar - Statistics -->
+        <aside class="stats-panel">
+            <h2><i class="fas fa-chart-bar"></i> Network Statistics</h2>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Nodes</div>
+                <div class="stat-value" id="totalNodes">-</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Active</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Edges</div>
+                <div class="stat-value" id="totalEdges">-</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-link"></i>
+                    <span>Connections</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Network Density</div>
+                <div class="stat-value" id="networkDensity">-</div>
+                <div class="stat-change">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Ratio</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Avg. Degree</div>
+                <div class="stat-value" id="avgDegree">-</div>
+                <div class="stat-change">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Per Node</span>
+                </div>
+            </div>
+
+            <h3 style="margin: 1.5rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                <i class="fas fa-star"></i> Top Nodes by Centrality
+            </h3>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node A</span>
+                    <span class="metric-value">0.85</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node B</span>
+                    <span class="metric-value">0.72</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 72%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node C</span>
+                    <span class="metric-value">0.68</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 68%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node D</span>
+                    <span class="metric-value">0.54</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 54%"></div>
+                </div>
+            </div>
+
+            <div class="node-info" id="selectedNodeInfo" style="display: none;">
+                <h3><i class="fas fa-info-circle"></i> Selected Node</h3>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="nodeName">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Degree:</span>
+                    <span class="info-value" id="nodeDegree">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Centrality:</span>
+                    <span class="info-value" id="nodeCentrality">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Community:</span>
+                    <span class="info-value" id="nodeCommunity">-</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    
+    <script>
+        // Load actual network data from original visualization
+        let plotlyData = [{"hoverinfo":"none","line":{"color":"gray","width":0.5},"mode":"lines","opacity":0.3,"showlegend":false,"x":[-0.252855324788197,-0.252855324788197,null,-0.252855324788197,-0.1864691045251891,null,-0.252855324788197,-0.3638443706291776,null,-0.252855324788197,-0.08544256476651446,null,-0.252855324788197,-0.37304752842516714,null,-0.252855324788197,-0.05702463513022102,null,-0.252855324788197,-0.13675601778564356,null,-0.252855324788197,-0.25999885017398866,null,-0.252855324788197,-0.5608169936589029,null,-0.252855324788197,0.0990409072038064,null,-0.252855324788197,-0.03680665439797601,null,-0.252855324788197,0.038054130471637145,null,-0.252855324788197,-0.1728408574228859,null,-0.1864691045251891,-0.30155487211560916,null,-0.1864691045251891,-0.1864691045251891,null,-0.1864691045251891,-0.2866206398705779,null,-0.1864691045251891,-0.15063312761817263,null,-0.1864691045251891,-0.15814644299407177,null,-0.1864691045251891,-0.13675601778564356,null,-0.1864691045251891,-0.25999885017398866,null,-0.1864691045251891,-0.10562169416756789,null,-0.3638443706291776,-0.252855324788197,null,-0.3638443706291776,-0.3638443706291776,null,-0.3638443706291776,-0.2866206398705779,null,-0.3638443706291776,-0.15063312761817263,null,-0.3638443706291776,-0.15814644299407177,null,-0.3638443706291776,-0.13675601778564356,null,-0.3638443706291776,-0.25999885017398866,null,-0.3638443706291776,0.0990409072038064,null,-0.3638443706291776,-0.03680665439797601,null,-0.3638443706291776,0.038054130471637145,null,-0.3638443706291776,-0.1728408574228859,null,-0.08544256476651446,-0.3638443706291776,null,-0.08544256476651446,0.004771233449698027,null,-0.08544256476651446,-0.08544256476651446,null,-0.08544256476651446,-0.2866206398705779,null,-0.08544256476651446,-0.37304752842516714,null,-0.08544256476651446,-0.15063312761817263,null,-0.08544256476651446,-0.15814644299407177,null,-0.08544256476651446,0.009904033766234614,null,-0.08544256476651446,-0.05702463513022102,null,-0.08544256476651446,-0.13675601778564356,null,-0.08544256476651446,-0.5608169936589029,null,-0.08544256476651446,0.04250134267242095,null,-0.08544256476651446,0.1619806257717881,null,-0.08544256476651446,0.1522386078728198,null,-0.08544256476651446,0.028607302384825114,null,-0.08544256476651446,0.060469593270392426,null,-0.08544256476651446,0.005732050150491163,null,-0.08544256476651446,-0.2290384506135222,null,-0.08544256476651446,0.18710599211209006,null,-0.08544256476651446,-0.05023824362946272,null,-0.08544256476651446,0.08943504044339054,null,-0.08544256476651446,0.0990409072038064,null,-0.08544256476651446,-0.014793958827444862,null,-0.08544256476651446,0.027213243108594184,null,-0.08544256476651446,-0.09432934860948526,null,-0.08544256476651446,-0.028474856328068943,null,-0.08544256476651446,-0.03680665439797601,null,-0.08544256476651446,0.038054130471637145,null,-0.08544256476651446,-0.1728408574228859,null,-0.37304752842516714,-0.2866206398705779,null,-0.37304752842516714,-0.29463327425416364,null,-0.37304752842516714,-0.13675601778564356,null,-0.37304752842516714,-0.25999885017398866,null,-0.37304752842516714,0.038054130471637145,null,-0.37304752842516714,-0.1728408574228859,null,-0.05702463513022102,-0.2866206398705779,null,-0.05702463513022102,-0.15063312761817263,null,-0.05702463513022102,-0.15814644299407177,null,-0.05702463513022102,0.009904033766234614,null,-0.05702463513022102,-0.05702463513022102,null,-0.05702463513022102,-0.13675601778564356,null,-0.05702463513022102,0.060469593270392426,null,-0.05702463513022102,0.005732050150491163,null,-0.05702463513022102,0.18710599211209006,null,-0.05702463513022102,0.038054130471637145,null,-0.13675601778564356,-0.2866206398705779,null,-0.13675601778564356,-0.37304752842516714,null,-0.13675601778564356,-0.15063312761817263,null,-0.13675601778564356,-0.15814644299407177,null,-0.13675601778564356,0.10114953458154916,null,-0.13675601778564356,0.009904033766234614,null,-0.13675601778564356,-0.05702463513022102,null,-0.13675601778564356,-0.4156896382749921,null,-0.13675601778564356,-0.13675601778564356,null,-0.13675601778564356,-0.25999885017398866,null,-0.13675601778564356,-0.5608169936589029,null,-0.13675601778564356,0.04250134267242095,null,-0.13675601778564356,0.06331190611440535,null,-0.13675601778564356,0.060469593270392426,null,-0.13675601778564356,0.005732050150491163,null,-0.13675601778564356,-0.2290384506135222,null,-0.13675601778564356,0.18710599211209006,null,-0.13675601778564356,-0.05023824362946272,null,-0.13675601778564356,0.08943504044339054,null,-0.13675601778564356,0.0990409072038064,null,-0.13675601778564356,-0.03680665439797601,null,-0.13675601778564356,0.038054130471637145,null,-0.13675601778564356,0.04941418498127958,null,-0.13675601778564356,-0.1728408574228859,null,-0.25999885017398866,-0.2866206398705779,null,-0.25999885017398866,-0.37304752842516714,null,-0.25999885017398866,-0.15063312761817263,null,-0.25999885017398866,-0.13675601778564356,null,-0.25999885017398866,-0.25999885017398866,null,-0.25999885017398866,-0.5608169936589029,null,-0.25999885017398866,0.060469593270392426,null,-0.25999885017398866,0.005732050150491163,null,-0.25999885017398866,-0.10562169416756789,null,-0.25999885017398866,-0.2290384506135222,null,-0.25999885017398866,0.18710599211209006,null,-0.25999885017398866,-0.05023824362946272,null,-0.25999885017398866,0.08943504044339054,null,-0.25999885017398866,0.0990409072038064,null,-0.25999885017398866,-0.48490439271789004,null,-0.25999885017398866,-0.1728408574228859,null,-0.5608169936589029,-0.5608169936589029,null,-0.5608169936589029,0.038054130471637145,null,-0.5608169936589029,-0.1728408574228859,null,0.0990409072038064,0.08194952097500778,null,0.0990409072038064,-0.1690975117806332,null,0.0990409072038064,0.28584750360020167,null,0.0990409072038064,0.33611693940702214,null,0.0990409072038064,0.10925060882471374,null,0.0990409072038064,0.26779525913472657,null,0.0990409072038064,-0.01979918442280888,null,0.0990409072038064,0.04250134267242095,null,0.0990409072038064,0.30578357189033234,null,0.0990409072038064,0.4479145146138027,null,0.0990409072038064,0.1702663068464682,null,0.0990409072038064,0.0966653028950195,null,0.0990409072038064,0.27787266245253656,null,0.0990409072038064,0.5994292787718007,null,0.0990409072038064,0.1619806257717881,null,0.0990409072038064,0.17229006718757392,null,0.0990409072038064,0.1522386078728198,null,0.0990409072038064,0.028607302384825114,null,0.0990409072038064,0.009541222751769338,null,0.0990409072038064,0.2384491685558417,null,0.0990409072038064,-0.6225283015838625,null,0.0990409072038064,0.054509865551800964,null,0.0990409072038064,0.13640959375076997,null,0.0990409072038064,0.06331190611440535,null,0.0990409072038064,-0.009962916874576842,null,0.0990409072038064,0.29727836243286726,null,0.0990409072038064,0.060469593270392426,null,0.0990409072038064,0.005732050150491163,null,0.0990409072038064,-0.10562169416756789,null,0.0990409072038064,-0.2290384506135222,null,0.0990409072038064,0.18710599211209006,null,0.0990409072038064,-0.05023824362946272,null,0.0990409072038064,0.08943504044339054,null,0.0990409072038064,0.0990409072038064,null,0.0990409072038064,-0.48490439271789004,null,0.0990409072038064,0.09546776922438927,null,0.0990409072038064,0.1553988412896176,null,0.0990409072038064,0.11475423622127827,null,0.0990409072038064,0.16740434415095717,null,0.0990409072038064,0.09303599327940484,null,0.0990409072038064,0.08246961931843445,null,0.0990409072038064,-0.5362921051027204,null,0.0990409072038064,-0.1466512420273052,null,0.0990409072038064,-0.03473556596775076,null,0.0990409072038064,0.20237710916350318,null,0.0990409072038064,0.06319647783221378,null,0.0990409072038064,0.0815418005670714,null,0.0990409072038064,0.18626857936721591,null,0.0990409072038064,0.05703330561677692,null,0.0990409072038064,0.002455406336435857,null,0.0990409072038064,0.12816576933029103,null,0.0990409072038064,0.09423993789426603,null,0.0990409072038064,0.06871192788841603,null,0.0990409072038064,-0.023952332668672964,null,0.0990409072038064,0.6038093389309235,null,0.0990409072038064,-0.22464023841064581,null,0.0990409072038064,0.3029539735812156,null,0.0990409072038064,0.04159092720090632,null,0.0990409072038064,-0.09432934860948526,null,0.0990409072038064,-0.03680665439797601,null,-0.03680665439797601,-0.252855324788197,null,-0.03680665439797601,-0.30155487211560916,null,-0.03680665439797601,-0.7438895986759475,null,-0.03680665439797601,-0.6087974890262643,null,-0.03680665439797601,-0.5359273360070705,null,-0.03680665439797601,-0.1864691045251891,null,-0.03680665439797601,-0.3638443706291776,null,-0.03680665439797601,-0.21938550868633475,null,-0.03680665439797601,0.23377042905798479,null,-0.03680665439797601,-0.10856284828320309,null,-0.03680665439797601,0.004771233449698027,null,-0.03680665439797601,-0.18386033908940683,null,-0.03680665439797601,0.39799096662722105,null,-0.03680665439797601,0.16764997014744862,null,-0.03680665439797601,-0.6018103248944167,null,-0.03680665439797601,-0.06077115634072489,null,-0.03680665439797601,0.6243375484352359,null,-0.03680665439797601,-0.23932521457913866,null,-0.03680665439797601,-0.3627178006383887,null,-0.03680665439797601,-0.08544256476651446,null,-0.03680665439797601,-0.2866206398705779,null,-0.03680665439797601,-0.37304752842516714,null,-0.03680665439797601,-0.15063312761817263,null,-0.03680665439797601,-0.15814644299407177,null,-0.03680665439797601,0.09964779418926023,null,-0.03680665439797601,-0.29463327425416364,null,-0.03680665439797601,0.08194952097500778,null,-0.03680665439797601,-0.1690975117806332,null,-0.03680665439797601,0.28584750360020167,null,-0.03680665439797601,0.33611693940702214,null,-0.03680665439797601,0.395908758306365,null,-0.03680665439797601,0.10925060882471374,null,-0.03680665439797601,0.26779525913472657,null,-0.03680665439797601,-0.01979918442280888,null,-0.03680665439797601,0.3062713594271183,null,-0.03680665439797601,-0.4480922465360008,null,-0.03680665439797601,0.44809826233772243,null,-0.03680665439797601,-0.391033593733103,null,-0.03680665439797601,0.10114953458154916,null,-0.03680665439797601,0.009904033766234614,null,-0.03680665439797601,-0.05702463513022102,null,-0.03680665439797601,-0.4156896382749921,null,-0.03680665439797601,-0.13675601778564356,null,-0.03680665439797601,-0.25999885017398866,null,-0.03680665439797601,-0.5608169936589029,null,-0.03680665439797601,0.04250134267242095,null,-0.03680665439797601,0.2996301701333789,null,-0.03680665439797601,0.30578357189033234,null,-0.03680665439797601,0.4479145146138027,null,-0.03680665439797601,0.0966653028950195,null,-0.03680665439797601,0.27787266245253656,null,-0.03680665439797601,0.5994292787718007,null,-0.03680665439797601,0.1619806257717881,null,-0.03680665439797601,0.17229006718757392,null,-0.03680665439797601,0.1522386078728198,null,-0.03680665439797601,0.028607302384825114,null,-0.03680665439797601,0.009541222751769338,null,-0.03680665439797601,0.2384491685558417,null,-0.03680665439797601,-0.6225283015838625,null,-0.03680665439797601,0.054509865551800964,null,-0.03680665439797601,0.13640959375076997,null,-0.03680665439797601,0.06331190611440535,null,-0.03680665439797601,-0.009962916874576842,null,-0.03680665439797601,0.29727836243286726,null,-0.03680665439797601,0.060469593270392426,null,-0.03680665439797601,0.005732050150491163,null,-0.03680665439797601,-0.10562169416756789,null,-0.03680665439797601,-0.2290384506135222,null,-0.03680665439797601,0.18710599211209006,null,-0.03680665439797601,-0.05023824362946272,null,-0.03680665439797601,0.08943504044339054,null,-0.03680665439797601,0.0990409072038064,null,-0.03680665439797601,-0.48490439271789004,null,-0.03680665439797601,0.6162309373296061,null,-0.03680665439797601,0.40323468255758227,null,-0.03680665439797601,0.09546776922438927,null,-0.03680665439797601,0.18702689685163446,null,-0.03680665439797601,0.1553988412896176,null,-0.03680665439797601,0.11475423622127827,null,-0.03680665439797601,0.16740434415095717,null,-0.03680665439797601,0.09303599327940484,null,-0.03680665439797601,0.08246961931843445,null,-0.03680665439797601,-0.5362921051027204,null,-0.03680665439797601,-0.1466512420273052,null,-0.03680665439797601,-0.03473556596775076,null,-0.03680665439797601,0.20237710916350318,null,-0.03680665439797601,0.06319647783221378,null,-0.03680665439797601,0.0815418005670714,null,-0.03680665439797601,0.18626857936721591,null,-0.03680665439797601,0.05703330561677692,null,-0.03680665439797601,-0.050828039068373396,null,-0.03680665439797601,0.002455406336435857,null,-0.03680665439797601,0.12816576933029103,null,-0.03680665439797601,0.042607347436113545,null,-0.03680665439797601,0.09423993789426603,null,-0.03680665439797601,0.018380342862312632,null,-0.03680665439797601,-0.1403535076089,null,-0.03680665439797601,0.06871192788841603,null,-0.03680665439797601,-0.023952332668672964,null,-0.03680665439797601,0.6038093389309235,null,-0.03680665439797601,-0.22464023841064581,null,-0.03680665439797601,0.6235258820011441,null,-0.03680665439797601,0.3029539735812156,null,-0.03680665439797601,0.28867371863579067,null,-0.03680665439797601,0.04159092720090632,null,-0.03680665439797601,-0.014793958827444862,null,-0.03680665439797601,0.027213243108594184,null,-0.03680665439797601,-0.09432934860948526,null,-0.03680665439797601,-0.0015099583064107627,null,-0.03680665439797601,-0.028474856328068943,null,-0.03680665439797601,0.05591947480762767,null,-0.03680665439797601,-0.012200878791194537,null,-0.03680665439797601,-0.017550494847514003,null,-0.03680665439797601,-0.20176933670452085,null,-0.03680665439797601,-0.08876986711147754,null,-0.03680665439797601,-0.03680665439797601,null,-0.03680665439797601,0.038054130471637145,null,-0.03680665439797601,-0.015070755974836,null,-0.03680665439797601,-0.15459632707958687,null,-0.03680665439797601,-0.1074320392108557,null,-0.03680665439797601,-0.34076102287964954,null,-0.03680665439797601,0.04941418498127958,null,-0.03680665439797601,-0.23178600151815423,null,-0.03680665439797601,0.04837308531946771,null,-0.03680665439797601,0.1070862501102821,null,-0.03680665439797601,0.026603559379496024,null,-0.03680665439797601,-0.1401370266343255,null,-0.03680665439797601,-0.2558440596545207,null,-0.03680665439797601,-0.1728408574228859,null,0.038054130471637145,0.09964779418926023,null,0.038054130471637145,0.33611693940702214,null,0.038054130471637145,0.395908758306365,null,0.038054130471637145,0.26779525913472657,null,0.038054130471637145,-0.009962916874576842,null,0.038054130471637145,0.29727836243286726,null,0.038054130471637145,0.08943504044339054,null,0.038054130471637145,0.018380342862312632,null,0.038054130471637145,0.06871192788841603,null,0.038054130471637145,-0.023952332668672964,null,0.038054130471637145,0.6038093389309235,null,0.038054130471637145,-0.22464023841064581,null,0.038054130471637145,0.6235258820011441,null,0.038054130471637145,-0.014793958827444862,null,0.038054130471637145,0.027213243108594184,null,0.038054130471637145,-0.09432934860948526,null,0.038054130471637145,-0.0015099583064107627,null,0.038054130471637145,-0.028474856328068943,null,0.038054130471637145,0.05591947480762767,null,0.038054130471637145,-0.012200878791194537,null,0.038054130471637145,-0.017550494847514003,null,0.038054130471637145,-0.20176933670452085,null,0.038054130471637145,-0.08876986711147754,null,0.038054130471637145,-0.03680665439797601,null,0.038054130471637145,-0.015070755974836,null,0.038054130471637145,-0.15459632707958687,null,0.038054130471637145,-0.1074320392108557,null,0.038054130471637145,0.04941418498127958,null,0.038054130471637145,-0.23178600151815423,null,0.038054130471637145,0.04837308531946771,null,0.038054130471637145,0.1070862501102821,null,0.038054130471637145,0.026603559379496024,null,0.038054130471637145,-0.1401370266343255,null,0.038054130471637145,-0.2558440596545207,null,0.038054130471637145,-0.1728408574228859,null,-0.30155487211560916,-0.252855324788197,null,-0.30155487211560916,-0.30155487211560916,null,-0.30155487211560916,-0.3638443706291776,null,-0.30155487211560916,-0.3627178006383887,null,-0.30155487211560916,-0.08544256476651446,null,-0.30155487211560916,-0.2866206398705779,null,-0.30155487211560916,-0.15063312761817263,null,-0.30155487211560916,-0.15814644299407177,null,-0.30155487211560916,-0.391033593733103,null,-0.30155487211560916,-0.05702463513022102,null,-0.30155487211560916,-0.13675601778564356,null,-0.30155487211560916,-0.25999885017398866,null,-0.30155487211560916,-0.5608169936589029,null,-0.30155487211560916,-0.05023824362946272,null,-0.30155487211560916,0.0990409072038064,null,-0.30155487211560916,-0.03680665439797601,null,-0.30155487211560916,0.038054130471637145,null,-0.30155487211560916,-0.1728408574228859,null,-0.3627178006383887,-0.3627178006383887,null,-0.3627178006383887,-0.15063312761817263,null,-0.3627178006383887,-0.13675601778564356,null,-0.3627178006383887,-0.5608169936589029,null,-0.3627178006383887,-0.05023824362946272,null,-0.3627178006383887,0.0990409072038064,null,-0.3627178006383887,0.038054130471637145,null,-0.3627178006383887,-0.1728408574228859,null,-0.2866206398705779,-0.30155487211560916,null,-0.2866206398705779,-0.3638443706291776,null,-0.2866206398705779,-0.2866206398705779,null,-0.2866206398705779,-0.391033593733103,null,-0.2866206398705779,0.10114953458154916,null,-0.2866206398705779,0.009904033766234614,null,-0.2866206398705779,-0.05702463513022102,null,-0.2866206398705779,-0.4156896382749921,null,-0.2866206398705779,-0.13675601778564356,null,-0.2866206398705779,-0.25999885017398866,null,-0.2866206398705779,-0.5608169936589029,null,-0.2866206398705779,0.060469593270392426,null,-0.2866206398705779,0.005732050150491163,null,-0.2866206398705779,-0.05023824362946272,null,-0.2866206398705779,0.0990409072038064,null,-0.2866206398705779,-0.48490439271789004,null,-0.2866206398705779,0.04159092720090632,null,-0.2866206398705779,0.038054130471637145,null,-0.2866206398705779,-0.1728408574228859,null,-0.15063312761817263,-0.252855324788197,null,-0.15063312761817263,-0.30155487211560916,null,-0.15063312761817263,-0.7438895986759475,null,-0.15063312761817263,-0.6087974890262643,null,-0.15063312761817263,-0.5359273360070705,null,-0.15063312761817263,-0.3638443706291776,null,-0.15063312761817263,-0.21938550868633475,null,-0.15063312761817263,0.23377042905798479,null,-0.15063312761817263,-0.10856284828320309,null,-0.15063312761817263,0.004771233449698027,null,-0.15063312761817263,-0.18386033908940683,null,-0.15063312761817263,0.39799096662722105,null,-0.15063312761817263,0.16764997014744862,null,-0.15063312761817263,-0.6018103248944167,null,-0.15063312761817263,-0.06077115634072489,null,-0.15063312761817263,-0.23932521457913866,null,-0.15063312761817263,-0.3627178006383887,null,-0.15063312761817263,-0.08544256476651446,null,-0.15063312761817263,-0.2866206398705779,null,-0.15063312761817263,-0.05702463513022102,null,-0.15063312761817263,-0.13675601778564356,null,-0.15063312761817263,-0.25999885017398866,null,-0.15063312761817263,-0.5608169936589029,null,-0.15063312761817263,0.4479145146138027,null,-0.15063312761817263,0.1702663068464682,null,-0.15063312761817263,0.5994292787718007,null,-0.15063312761817263,0.1619806257717881,null,-0.15063312761817263,-0.6225283015838625,null,-0.15063312761817263,0.054509865551800964,null,-0.15063312761817263,0.13640959375076997,null,-0.15063312761817263,0.06331190611440535,null,-0.15063312761817263,0.060469593270392426,null,-0.15063312761817263,0.005732050150491163,null,-0.15063312761817263,-0.10562169416756789,null,-0.15063312761817263,-0.2290384506135222,null,-0.15063312761817263,0.18710599211209006,null,-0.15063312761817263,-0.05023824362946272,null,-0.15063312761817263,0.08943504044339054,null,-0.15063312761817263,0.0990409072038064,null,-0.15063312761817263,0.04159092720090632,null,-0.15063312761817263,-0.014793958827444862,null,-0.15063312761817263,-0.09432934860948526,null,-0.15063312761817263,-0.03680665439797601,null,-0.15063312761817263,0.038054130471637145,null,-0.15063312761817263,-0.1728408574228859,null,-0.15814644299407177,-0.252855324788197,null,-0.15814644299407177,-0.30155487211560916,null,-0.15814644299407177,-0.7438895986759475,null,-0.15814644299407177,-0.6087974890262643,null,-0.15814644299407177,-0.5359273360070705,null,-0.15814644299407177,-0.1864691045251891,null,-0.15814644299407177,-0.3638443706291776,null,-0.15814644299407177,-0.21938550868633475,null,-0.15814644299407177,0.23377042905798479,null,-0.15814644299407177,0.004771233449698027,null,-0.15814644299407177,-0.18386033908940683,null,-0.15814644299407177,0.39799096662722105,null,-0.15814644299407177,0.6243375484352359,null,-0.15814644299407177,-0.23932521457913866,null,-0.15814644299407177,-0.3627178006383887,null,-0.15814644299407177,-0.08544256476651446,null,-0.15814644299407177,-0.09432934860948526,null,-0.391033593733103,-0.391033593733103,null,-0.391033593733103,0.10114953458154916,null,-0.391033593733103,-0.4156896382749921,null,-0.391033593733103,-0.13675601778564356,null,-0.391033593733103,-0.25999885017398866,null,-0.391033593733103,-0.5608169936589029,null,-0.391033593733103,0.005732050150491163,null,-0.391033593733103,0.0990409072038064,null,-0.05023824362946272,-0.5608169936589029,null,-0.05023824362946272,0.04250134267242095,null,-0.05023824362946272,0.2996301701333789,null,-0.05023824362946272,0.1702663068464682,null,-0.05023824362946272,0.0966653028950195,null,-0.05023824362946272,0.5994292787718007,null,-0.05023824362946272,0.1619806257717881,null,-0.05023824362946272,0.17229006718757392,null,-0.05023824362946272,0.1522386078728198,null,-0.05023824362946272,0.028607302384825114,null,-0.05023824362946272,0.2384491685558417,null,-0.05023824362946272,0.060469593270392426,null,-0.05023824362946272,0.005732050150491163,null,-0.05023824362946272,-0.2290384506135222,null,-0.05023824362946272,0.18710599211209006,null,-0.05023824362946272,-0.05023824362946272,null,-0.05023824362946272,0.08943504044339054,null,-0.05023824362946272,0.0990409072038064,null,-0.05023824362946272,-0.48490439271789004,null,-0.05023824362946272,0.04159092720090632,null,-0.7438895986759475,-0.7438895986759475,null,-0.7438895986759475,-0.37304752842516714,null,-0.7438895986759475,-0.13675601778564356,null,-0.7438895986759475,-0.5608169936589029,null,-0.6087974890262643,-0.6087974890262643,null,-0.6087974890262643,-0.37304752842516714,null,-0.6087974890262643,-0.13675601778564356,null,-0.6087974890262643,-0.25999885017398866,null,-0.6087974890262643,-0.5608169936589029,null,-0.5359273360070705,-0.5359273360070705,null,-0.5359273360070705,-0.37304752842516714,null,-0.5359273360070705,-0.13675601778564356,null,-0.5359273360070705,-0.25999885017398866,null,-0.5359273360070705,-0.5608169936589029,null,-0.10562169416756789,-0.252855324788197,null,-0.10562169416756789,-0.30155487211560916,null,-0.10562169416756789,-0.7438895986759475,null,-0.10562169416756789,-0.6087974890262643,null,-0.10562169416756789,-0.5359273360070705,null,-0.10562169416756789,-0.1864691045251891,null,-0.10562169416756789,-0.3638443706291776,null,-0.10562169416756789,-0.21938550868633475,null,-0.10562169416756789,0.23377042905798479,null,-0.10562169416756789,-0.10856284828320309,null,-0.10562169416756789,0.004771233449698027,null,-0.10562169416756789,-0.18386033908940683,null,-0.10562169416756789,0.39799096662722105,null,-0.10562169416756789,0.16764997014744862,null,-0.10562169416756789,-0.06077115634072489,null,-0.10562169416756789,0.6243375484352359,null,-0.10562169416756789,-0.23932521457913866,null,-0.10562169416756789,-0.3627178006383887,null,-0.10562169416756789,-0.08544256476651446,null,-0.10562169416756789,-0.05702463513022102,null,-0.10562169416756789,-0.13675601778564356,null,-0.10562169416756789,0.028607302384825114,null,-0.10562169416756789,0.13640959375076997,null,-0.10562169416756789,-0.009962916874576842,null,-0.10562169416756789,0.29727836243286726,null,-0.10562169416756789,0.060469593270392426,null,-0.10562169416756789,0.005732050150491163,null,-0.10562169416756789,-0.10562169416756789,null,-0.10562169416756789,-0.2290384506135222,null,-0.10562169416756789,0.08943504044339054,null,-0.10562169416756789,-0.09432934860948526,null,-0.10562169416756789,-0.03680665439797601,null,-0.21938550868633475,-0.21938550868633475,null,-0.21938550868633475,-0.2866206398705779,null,-0.21938550868633475,-0.391033593733103,null,-0.21938550868633475,0.10114953458154916,null,-0.21938550868633475,0.009904033766234614,null,-0.21938550868633475,-0.05702463513022102,null,-0.21938550868633475,-0.13675601778564356,null,-0.21938550868633475,-0.5608169936589029,null,-0.21938550868633475,0.04250134267242095,null,-0.21938550868633475,0.005732050150491163,null,-0.21938550868633475,-0.05023824362946272,null,-0.21938550868633475,0.0990409072038064,null,-0.21938550868633475,-0.48490439271789004,null,-0.21938550868633475,0.027213243108594184,null,-0.21938550868633475,-0.03680665439797601,null,-0.21938550868633475,0.038054130471637145,null,0.10114953458154916,-0.391033593733103,null,0.10114953458154916,0.10114953458154916,null,0.10114953458154916,-0.13675601778564356,null,0.10114953458154916,-0.5608169936589029,null,0.009904033766234614,0.009904033766234614,null,0.009904033766234614,-0.05702463513022102,null,0.009904033766234614,-0.13675601778564356,null,0.009904033766234614,-0.05023824362946272,null,0.009904033766234614,0.038054130471637145,null,0.04250134267242095,0.04250134267242095,null,0.005732050150491163,0.10925060882471374,null,0.005732050150491163,0.009904033766234614,null,0.005732050150491163,-0.05702463513022102,null,0.005732050150491163,-0.4156896382749921,null,0.005732050150491163,-0.13675601778564356,null,0.005732050150491163,-0.25999885017398866,null,0.005732050150491163,-0.5608169936589029,null,0.005732050150491163,0.04250134267242095,null,0.005732050150491163,0.2996301701333789,null,0.005732050150491163,0.30578357189033234,null,0.005732050150491163,0.4479145146138027,null,0.005732050150491163,0.1702663068464682,null,0.005732050150491163,0.0966653028950195,null,0.005732050150491163,0.27787266245253656,null,0.005732050150491163,0.5994292787718007,null,0.005732050150491163,0.1619806257717881,null,0.005732050150491163,0.17229006718757392,null,0.005732050150491163,0.1522386078728198,null,0.005732050150491163,0.028607302384825114,null,0.005732050150491163,0.009541222751769338,null,0.005732050150491163,0.2384491685558417,null,0.005732050150491163,-0.6225283015838625,null,0.005732050150491163,0.054509865551800964,null,0.005732050150491163,0.13640959375076997,null,0.005732050150491163,0.06331190611440535,null,0.005732050150491163,-0.009962916874576842,null,0.005732050150491163,0.29727836243286726,null,0.005732050150491163,0.060469593270392426,null,0.005732050150491163,0.005732050150491163,null,0.005732050150491163,-0.10562169416756789,null,0.005732050150491163,-0.2290384506135222,null,0.005732050150491163,0.18710599211209006,null,0.005732050150491163,-0.05023824362946272,null,0.005732050150491163,0.08943504044339054,null,0.005732050150491163,0.0990409072038064,null,0.005732050150491163,-0.48490439271789004,null,0.005732050150491163,0.6162309373296061,null,0.005732050150491163,0.09546776922438927,null,0.005732050150491163,0.11475423622127827,null,0.005732050150491163,0.16740434415095717,null,0.005732050150491163,0.09303599327940484,null,0.005732050150491163,0.08246961931843445,null,0.005732050150491163,-0.5362921051027204,null,0.005732050150491163,-0.1466512420273052,null,0.005732050150491163,-0.03473556596775076,null,0.005732050150491163,0.20237710916350318,null,0.005732050150491163,0.06319647783221378,null,0.005732050150491163,0.0815418005670714,null,0.005732050150491163,0.18626857936721591,null,0.005732050150491163,0.05703330561677692,null,0.005732050150491163,0.002455406336435857,null,0.005732050150491163,0.12816576933029103,null,0.005732050150491163,0.09423993789426603,null,0.005732050150491163,-0.1403535076089,null,0.005732050150491163,0.06871192788841603,null,0.005732050150491163,-0.22464023841064581,null,0.005732050150491163,0.3029539735812156,null,0.005732050150491163,0.04159092720090632,null,0.005732050150491163,-0.09432934860948526,null,0.005732050150491163,-0.03680665439797601,null,-0.48490439271789004,-0.15814644299407177,null,-0.48490439271789004,-0.29463327425416364,null,-0.48490439271789004,-0.48490439271789004,null,-0.48490439271789004,-0.03680665439797601,null,-0.48490439271789004,-0.34076102287964954,null,-0.48490439271789004,-0.1728408574228859,null,0.027213243108594184,-0.252855324788197,null,0.027213243108594184,-0.30155487211560916,null,0.027213243108594184,-0.7438895986759475,null,0.027213243108594184,-0.6087974890262643,null,0.027213243108594184,-0.5359273360070705,null,0.027213243108594184,-0.1864691045251891,null,0.027213243108594184,-0.3638443706291776,null,0.027213243108594184,-0.21938550868633475,null,0.027213243108594184,0.23377042905798479,null,0.027213243108594184,0.004771233449698027,null,0.027213243108594184,0.39799096662722105,null,0.027213243108594184,0.6243375484352359,null,0.027213243108594184,-0.23932521457913866,null,0.027213243108594184,-0.3627178006383887,null,0.027213243108594184,-0.08544256476651446,null,0.027213243108594184,0.09964779418926023,null,0.027213243108594184,0.08194952097500778,null,0.027213243108594184,-0.1690975117806332,null,0.027213243108594184,0.28584750360020167,null,0.027213243108594184,0.33611693940702214,null,0.027213243108594184,0.395908758306365,null,0.027213243108594184,0.10925060882471374,null,0.027213243108594184,0.26779525913472657,null,0.027213243108594184,-0.01979918442280888,null,0.027213243108594184,0.3062713594271183,null,0.027213243108594184,0.04250134267242095,null,0.027213243108594184,0.2996301701333789,null,0.027213243108594184,0.30578357189033234,null,0.027213243108594184,0.4479145146138027,null,0.027213243108594184,0.1702663068464682,null,0.027213243108594184,0.0966653028950195,null,0.027213243108594184,0.27787266245253656,null,0.027213243108594184,0.5994292787718007,null,0.027213243108594184,0.1619806257717881,null,0.027213243108594184,0.17229006718757392,null,0.027213243108594184,0.1522386078728198,null,0.027213243108594184,0.028607302384825114,null,0.027213243108594184,0.009541222751769338,null,0.027213243108594184,0.2384491685558417,null,0.027213243108594184,-0.6225283015838625,null,0.027213243108594184,0.054509865551800964,null,0.027213243108594184,0.13640959375076997,null,0.027213243108594184,0.06331190611440535,null,0.027213243108594184,-0.009962916874576842,null,0.027213243108594184,0.29727836243286726,null,0.027213243108594184,0.060469593270392426,null,0.027213243108594184,0.005732050150491163,null,0.027213243108594184,-0.10562169416756789,null,0.027213243108594184,-0.2290384506135222,null,0.027213243108594184,0.18710599211209006,null,0.027213243108594184,-0.05023824362946272,null,0.027213243108594184,0.08943504044339054,null,0.027213243108594184,0.0990409072038064,null,0.027213243108594184,0.6162309373296061,null,0.027213243108594184,0.40323468255758227,null,0.027213243108594184,0.09546776922438927,null,0.027213243108594184,0.18702689685163446,null,0.027213243108594184,0.1553988412896176,null,0.027213243108594184,0.11475423622127827,null,0.027213243108594184,0.16740434415095717,null,0.027213243108594184,0.09303599327940484,null,0.027213243108594184,0.08246961931843445,null,0.027213243108594184,-0.5362921051027204,null,0.027213243108594184,-0.1466512420273052,null,0.027213243108594184,-0.03473556596775076,null,0.027213243108594184,0.20237710916350318,null,0.027213243108594184,0.06319647783221378,null,0.027213243108594184,0.0815418005670714,null,0.027213243108594184,0.18626857936721591,null,0.027213243108594184,0.05703330561677692,null,0.027213243108594184,-0.050828039068373396,null,0.027213243108594184,0.002455406336435857,null,0.027213243108594184,0.12816576933029103,null,0.027213243108594184,0.042607347436113545,null,0.027213243108594184,0.09423993789426603,null,0.027213243108594184,0.018380342862312632,null,0.027213243108594184,-0.1403535076089,null,0.027213243108594184,0.06871192788841603,null,0.027213243108594184,-0.023952332668672964,null,0.027213243108594184,0.6038093389309235,null,0.027213243108594184,-0.22464023841064581,null,0.027213243108594184,0.6235258820011441,null,0.027213243108594184,0.3029539735812156,null,0.027213243108594184,0.28867371863579067,null,0.027213243108594184,0.04159092720090632,null,0.027213243108594184,-0.014793958827444862,null,0.027213243108594184,0.027213243108594184,null,0.027213243108594184,-0.09432934860948526,null,0.027213243108594184,-0.0015099583064107627,null,0.027213243108594184,-0.028474856328068943,null,0.027213243108594184,0.05591947480762767,null,0.027213243108594184,-0.012200878791194537,null,0.027213243108594184,-0.017550494847514003,null,0.027213243108594184,-0.20176933670452085,null,0.027213243108594184,-0.08876986711147754,null,0.027213243108594184,-0.03680665439797601,null,0.027213243108594184,0.038054130471637145,null,0.027213243108594184,-0.015070755974836,null,0.027213243108594184,-0.15459632707958687,null,0.027213243108594184,-0.1074320392108557,null,0.027213243108594184,-0.34076102287964954,null,0.027213243108594184,0.04941418498127958,null,0.027213243108594184,-0.23178600151815423,null,0.027213243108594184,0.04837308531946771,null,0.027213243108594184,0.1070862501102821,null,0.027213243108594184,0.026603559379496024,null,0.027213243108594184,-0.1401370266343255,null,0.027213243108594184,-0.2558440596545207,null,0.027213243108594184,-0.1728408574228859,null,0.23377042905798479,0.23377042905798479,null,0.23377042905798479,0.009904033766234614,null,0.23377042905798479,-0.05702463513022102,null,0.23377042905798479,-0.13675601778564356,null,0.23377042905798479,-0.05023824362946272,null,0.23377042905798479,0.027213243108594184,null,0.23377042905798479,-0.03680665439797601,null,-0.10856284828320309,-0.10856284828320309,null,-0.10856284828320309,0.009904033766234614,null,-0.10856284828320309,-0.05702463513022102,null,-0.10856284828320309,0.27787266245253656,null,-0.10856284828320309,-0.05023824362946272,null,0.27787266245253656,0.04250134267242095,null,0.27787266245253656,0.30578357189033234,null,0.27787266245253656,0.4479145146138027,null,0.27787266245253656,0.1702663068464682,null,0.27787266245253656,0.0966653028950195,null,0.27787266245253656,0.27787266245253656,null,0.27787266245253656,0.5994292787718007,null,0.27787266245253656,0.1619806257717881,null,0.27787266245253656,0.17229006718757392,null,0.27787266245253656,0.1522386078728198,null,0.27787266245253656,0.2384491685558417,null,0.27787266245253656,0.13640959375076997,null,0.27787266245253656,0.060469593270392426,null,0.27787266245253656,0.005732050150491163,null,0.27787266245253656,-0.2290384506135222,null,0.27787266245253656,0.18710599211209006,null,0.27787266245253656,-0.05023824362946272,null,0.27787266245253656,0.08943504044339054,null,0.27787266245253656,0.0990409072038064,null,0.27787266245253656,-0.20176933670452085,null,0.27787266245253656,-0.03680665439797601,null,0.004771233449698027,0.004771233449698027,null,0.004771233449698027,0.009904033766234614,null,0.004771233449698027,-0.05702463513022102,null,0.004771233449698027,-0.13675601778564356,null,0.004771233449698027,-0.25999885017398866,null,0.004771233449698027,0.060469593270392426,null,0.004771233449698027,-0.10562169416756789,null,0.004771233449698027,-0.05023824362946272,null,0.004771233449698027,0.0990409072038064,null,0.004771233449698027,0.027213243108594184,null,0.004771233449698027,-0.03680665439797601,null,0.060469593270392426,0.10925060882471374,null,0.060469593270392426,0.26779525913472657,null,0.060469593270392426,-0.01979918442280888,null,0.060469593270392426,-0.391033593733103,null,0.060469593270392426,0.10114953458154916,null,0.060469593270392426,0.009904033766234614,null,0.060469593270392426,-0.05702463513022102,null,0.060469593270392426,-0.13675601778564356,null,0.060469593270392426,-0.5608169936589029,null,0.060469593270392426,0.04250134267242095,null,0.060469593270392426,0.2996301701333789,null,0.060469593270392426,0.30578357189033234,null,0.060469593270392426,0.4479145146138027,null,0.060469593270392426,0.1702663068464682,null,0.060469593270392426,0.0966653028950195,null,0.060469593270392426,0.27787266245253656,null,0.060469593270392426,0.5994292787718007,null,0.060469593270392426,0.1619806257717881,null,0.060469593270392426,0.17229006718757392,null,0.060469593270392426,0.1522386078728198,null,0.060469593270392426,0.028607302384825114,null,0.060469593270392426,0.009541222751769338,null,0.060469593270392426,0.2384491685558417,null,0.060469593270392426,-0.6225283015838625,null,0.060469593270392426,0.054509865551800964,null,0.060469593270392426,0.13640959375076997,null,0.060469593270392426,0.06331190611440535,null,0.060469593270392426,-0.009962916874576842,null,0.060469593270392426,0.29727836243286726,null,0.060469593270392426,0.060469593270392426,null,0.060469593270392426,0.005732050150491163,null,0.060469593270392426,-0.10562169416756789,null,0.060469593270392426,-0.2290384506135222,null,0.060469593270392426,0.18710599211209006,null,0.060469593270392426,-0.05023824362946272,null,0.060469593270392426,0.08943504044339054,null,0.060469593270392426,0.0990409072038064,null,0.060469593270392426,-0.48490439271789004,null,0.060469593270392426,0.6162309373296061,null,0.060469593270392426,0.09546776922438927,null,0.060469593270392426,0.18702689685163446,null,0.060469593270392426,0.1553988412896176,null,0.060469593270392426,0.11475423622127827,null,0.060469593270392426,0.16740434415095717,null,0.060469593270392426,0.09303599327940484,null,0.060469593270392426,0.08246961931843445,null,0.060469593270392426,-0.5362921051027204,null,0.060469593270392426,-0.1466512420273052,null,0.060469593270392426,-0.03473556596775076,null,0.060469593270392426,0.20237710916350318,null,0.060469593270392426,0.06319647783221378,null,0.060469593270392426,0.0815418005670714,null,0.060469593270392426,0.18626857936721591,null,0.060469593270392426,0.05703330561677692,null,0.060469593270392426,-0.050828039068373396,null,0.060469593270392426,0.002455406336435857,null,0.060469593270392426,0.12816576933029103,null,0.060469593270392426,0.09423993789426603,null,0.060469593270392426,-0.1403535076089,null,0.060469593270392426,0.06871192788841603,null,0.060469593270392426,0.6038093389309235,null,0.060469593270392426,-0.22464023841064581,null,0.060469593270392426,0.3029539735812156,null,0.060469593270392426,0.28867371863579067,null,0.060469593270392426,0.04159092720090632,null,0.060469593270392426,-0.09432934860948526,null,0.060469593270392426,-0.20176933670452085,null,0.060469593270392426,-0.03680665439797601,null,-0.18386033908940683,0.0966653028950195,null,-0.18386033908940683,0.27787266245253656,null,-0.18386033908940683,0.5994292787718007,null,-0.18386033908940683,0.1619806257717881,null,-0.18386033908940683,0.17229006718757392,null,0.0966653028950195,0.2996301701333789,null,0.0966653028950195,0.30578357189033234,null,0.0966653028950195,0.4479145146138027,null,0.0966653028950195,0.1702663068464682,null,0.0966653028950195,0.0966653028950195,null,0.0966653028950195,0.27787266245253656,null,0.0966653028950195,0.5994292787718007,null,0.0966653028950195,0.1619806257717881,null,0.0966653028950195,0.17229006718757392,null,0.0966653028950195,-0.6225283015838625,null,0.0966653028950195,0.054509865551800964,null,0.0966653028950195,0.13640959375076997,null,0.0966653028950195,0.06331190611440535,null,0.0966653028950195,0.060469593270392426,null,0.0966653028950195,0.005732050150491163,null,0.0966653028950195,-0.2290384506135222,null,0.0966653028950195,0.08943504044339054,null,0.0966653028950195,0.0990409072038064,null,0.0966653028950195,0.18626857936721591,null,0.0966653028950195,0.3029539735812156,null,0.0966653028950195,0.04159092720090632,null,0.0966653028950195,-0.03680665439797601,null,0.5994292787718007,0.4479145146138027,null,0.1619806257717881,0.3062713594271183,null,0.1619806257717881,0.30578357189033234,null,0.1619806257717881,0.4479145146138027,null,0.1619806257717881,0.1702663068464682,null,0.1619806257717881,0.0966653028950195,null,0.1619806257717881,0.27787266245253656,null,0.1619806257717881,0.5994292787718007,null,0.1619806257717881,0.1619806257717881,null,0.1619806257717881,0.17229006718757392,null,0.1619806257717881,0.2384491685558417,null,0.1619806257717881,-0.6225283015838625,null,0.1619806257717881,0.054509865551800964,null,0.1619806257717881,0.13640959375076997,null,0.1619806257717881,0.06331190611440535,null,0.1619806257717881,0.005732050150491163,null,0.1619806257717881,0.18710599211209006,null,0.1619806257717881,0.08943504044339054,null,0.1619806257717881,0.0990409072038064,null,0.1619806257717881,0.3029539735812156,null,0.1619806257717881,-0.20176933670452085,null,0.17229006718757392,0.09964779418926023,null,0.17229006718757392,0.33611693940702214,null,0.17229006718757392,0.395908758306365,null,0.17229006718757392,0.10925060882471374,null,0.17229006718757392,0.26779525913472657,null,0.17229006718757392,0.3062713594271183,null,0.17229006718757392,0.30578357189033234,null,0.17229006718757392,0.4479145146138027,null,0.17229006718757392,0.1702663068464682,null,0.17229006718757392,0.0966653028950195,null,0.17229006718757392,0.5994292787718007,null,0.17229006718757392,0.1619806257717881,null,0.17229006718757392,0.17229006718757392,null,0.17229006718757392,-0.6225283015838625,null,0.17229006718757392,0.054509865551800964,null,0.17229006718757392,0.29727836243286726,null,0.17229006718757392,0.18710599211209006,null,0.17229006718757392,0.08943504044339054,null,0.17229006718757392,0.20237710916350318,null,0.17229006718757392,0.06319647783221378,null,0.17229006718757392,0.6235258820011441,null,0.17229006718757392,0.3029539735812156,null,0.17229006718757392,0.027213243108594184,null,0.17229006718757392,-0.0015099583064107627,null,0.17229006718757392,-0.028474856328068943,null,0.17229006718757392,0.05591947480762767,null,0.17229006718757392,-0.012200878791194537,null,0.17229006718757392,-0.017550494847514003,null,0.17229006718757392,-0.20176933670452085,null,0.17229006718757392,0.04941418498127958,null,0.17229006718757392,0.1070862501102821,null,0.17229006718757392,0.026603559379496024,null,0.17229006718757392,-0.1401370266343255,null,0.39799096662722105,0.39799096662722105,null,0.39799096662722105,0.009904033766234614,null,0.39799096662722105,-0.05702463513022102,null,0.39799096662722105,0.2996301701333789,null,0.39799096662722105,0.30578357189033234,null,0.39799096662722105,0.4479145146138027,null,0.39799096662722105,0.1702663068464682,null,0.39799096662722105,0.0966653028950195,null,0.39799096662722105,0.27787266245253656,null,0.39799096662722105,0.5994292787718007,null,0.39799096662722105,0.1619806257717881,null,0.39799096662722105,0.17229006718757392,null,0.39799096662722105,0.08943504044339054,null,0.2996301701333789,0.2996301701333789,null,0.2996301701333789,0.30578357189033234,null,0.2996301701333789,0.4479145146138027,null,0.2996301701333789,0.1702663068464682,null,0.2996301701333789,0.0966653028950195,null,0.2996301701333789,0.27787266245253656,null,0.2996301701333789,0.5994292787718007,null,0.2996301701333789,0.1619806257717881,null,0.2996301701333789,0.17229006718757392,null,0.2996301701333789,0.054509865551800964,null,0.2996301701333789,0.13640959375076997,null,0.2996301701333789,0.08943504044339054,null,0.30578357189033234,0.2996301701333789,null,0.30578357189033234,0.30578357189033234,null,0.30578357189033234,0.4479145146138027,null,0.30578357189033234,0.1702663068464682,null,0.30578357189033234,0.0966653028950195,null,0.30578357189033234,0.27787266245253656,null,0.30578357189033234,0.5994292787718007,null,0.30578357189033234,0.1619806257717881,null,0.30578357189033234,0.17229006718757392,null,0.30578357189033234,0.054509865551800964,null,0.30578357189033234,0.13640959375076997,null,0.30578357189033234,0.005732050150491163,null,0.30578357189033234,0.08943504044339054,null,0.30578357189033234,-0.03680665439797601,null,0.4479145146138027,0.30578357189033234,null,0.4479145146138027,0.4479145146138027,null,0.4479145146138027,0.1702663068464682,null,0.4479145146138027,0.0966653028950195,null,0.4479145146138027,0.27787266245253656,null,0.4479145146138027,0.5994292787718007,null,0.4479145146138027,0.1619806257717881,null,0.4479145146138027,0.17229006718757392,null,0.4479145146138027,0.08943504044339054,null,0.1702663068464682,0.30578357189033234,null,0.1702663068464682,0.1702663068464682,null,0.1702663068464682,0.0966653028950195,null,0.1702663068464682,0.27787266245253656,null,0.1702663068464682,0.5994292787718007,null,0.1702663068464682,0.1619806257717881,null,0.1702663068464682,0.17229006718757392,null,0.1702663068464682,0.08943504044339054,null,0.08943504044339054,0.10925060882471374,null,0.08943504044339054,0.30578357189033234,null,0.08943504044339054,0.4479145146138027,null,0.08943504044339054,0.1702663068464682,null,0.08943504044339054,0.0966653028950195,null,0.08943504044339054,0.27787266245253656,null,0.08943504044339054,0.5994292787718007,null,0.08943504044339054,0.1619806257717881,null,0.08943504044339054,0.17229006718757392,null,0.08943504044339054,0.1522386078728198,null,0.08943504044339054,0.028607302384825114,null,0.08943504044339054,0.2384491685558417,null,0.08943504044339054,-0.6225283015838625,null,0.08943504044339054,0.054509865551800964,null,0.08943504044339054,0.13640959375076997,null,0.08943504044339054,0.06331190611440535,null,0.08943504044339054,0.060469593270392426,null,0.08943504044339054,0.005732050150491163,null,0.08943504044339054,-0.2290384506135222,null,0.08943504044339054,0.18710599211209006,null,0.08943504044339054,-0.05023824362946272,null,0.08943504044339054,0.08943504044339054,null,0.08943504044339054,0.0990409072038064,null,0.08943504044339054,0.09546776922438927,null,0.08943504044339054,0.11475423622127827,null,0.08943504044339054,0.16740434415095717,null,0.08943504044339054,0.09303599327940484,null,0.08943504044339054,0.08246961931843445,null,0.08943504044339054,-0.1466512420273052,null,0.08943504044339054,-0.03473556596775076,null,0.08943504044339054,0.20237710916350318,null,0.08943504044339054,0.06319647783221378,null,0.08943504044339054,0.0815418005670714,null,0.08943504044339054,0.18626857936721591,null,0.08943504044339054,0.05703330561677692,null,0.08943504044339054,0.002455406336435857,null,0.08943504044339054,0.12816576933029103,null,0.08943504044339054,0.042607347436113545,null,0.08943504044339054,0.09423993789426603,null,0.08943504044339054,0.018380342862312632,null,0.08943504044339054,-0.1403535076089,null,0.08943504044339054,0.06871192788841603,null,0.08943504044339054,-0.023952332668672964,null,0.08943504044339054,-0.22464023841064581,null,0.08943504044339054,0.3029539735812156,null,0.08943504044339054,0.04159092720090632,null,0.08943504044339054,-0.03680665439797601,null,0.16764997014744862,0.16764997014744862,null,0.16764997014744862,-0.4156896382749921,null,0.16764997014744862,-0.13675601778564356,null,0.16764997014744862,-0.03680665439797601,null,-0.4156896382749921,-0.4156896382749921,null,-0.4156896382749921,-0.1728408574228859,null,-0.6018103248944167,-0.6018103248944167,null,-0.6018103248944167,-0.4156896382749921,null,-0.6018103248944167,-0.03680665439797601,null,-0.06077115634072489,-0.06077115634072489,null,-0.06077115634072489,0.054509865551800964,null,-0.06077115634072489,0.13640959375076997,null,-0.06077115634072489,0.06331190611440535,null,-0.06077115634072489,0.060469593270392426,null,-0.06077115634072489,0.005732050150491163,null,-0.06077115634072489,0.18710599211209006,null,-0.06077115634072489,0.08943504044339054,null,-0.06077115634072489,0.0990409072038064,null,-0.06077115634072489,0.20237710916350318,null,0.054509865551800964,0.08194952097500778,null,0.054509865551800964,0.1702663068464682,null,0.054509865551800964,0.5994292787718007,null,0.054509865551800964,0.1619806257717881,null,0.054509865551800964,0.17229006718757392,null,0.054509865551800964,-0.6225283015838625,null,0.054509865551800964,0.054509865551800964,null,0.054509865551800964,0.13640959375076997,null,0.054509865551800964,0.06331190611440535,null,0.054509865551800964,0.04159092720090632,null,0.13640959375076997,0.33611693940702214,null,0.13640959375076997,0.395908758306365,null,0.13640959375076997,0.10925060882471374,null,0.13640959375076997,0.26779525913472657,null,0.13640959375076997,-0.01979918442280888,null,0.13640959375076997,0.3062713594271183,null,0.13640959375076997,0.44809826233772243,null,0.13640959375076997,0.1702663068464682,null,0.13640959375076997,0.5994292787718007,null,0.13640959375076997,0.1619806257717881,null,0.13640959375076997,0.17229006718757392,null,0.13640959375076997,0.1522386078728198,null,0.13640959375076997,-0.6225283015838625,null,0.13640959375076997,0.054509865551800964,null,0.13640959375076997,0.13640959375076997,null,0.13640959375076997,0.06331190611440535,null,0.13640959375076997,0.060469593270392426,null,0.13640959375076997,0.08943504044339054,null,0.13640959375076997,0.1553988412896176,null,0.13640959375076997,0.11475423622127827,null,0.13640959375076997,0.16740434415095717,null,0.13640959375076997,0.09303599327940484,null,0.13640959375076997,-0.5362921051027204,null,0.13640959375076997,-0.1466512420273052,null,0.13640959375076997,-0.03473556596775076,null,0.13640959375076997,0.20237710916350318,null,0.13640959375076997,0.06319647783221378,null,0.13640959375076997,0.0815418005670714,null,0.13640959375076997,0.18626857936721591,null,0.13640959375076997,0.05703330561677692,null,0.13640959375076997,0.002455406336435857,null,0.13640959375076997,0.12816576933029103,null,0.13640959375076997,0.042607347436113545,null,0.13640959375076997,0.09423993789426603,null,0.13640959375076997,0.018380342862312632,null,0.13640959375076997,-0.1403535076089,null,0.13640959375076997,0.06871192788841603,null,0.13640959375076997,-0.023952332668672964,null,0.13640959375076997,0.6038093389309235,null,0.13640959375076997,-0.22464023841064581,null,0.13640959375076997,0.6235258820011441,null,0.13640959375076997,0.3029539735812156,null,0.13640959375076997,0.04159092720090632,null,0.13640959375076997,-0.014793958827444862,null,0.13640959375076997,-0.09432934860948526,null,0.13640959375076997,-0.028474856328068943,null,0.13640959375076997,-0.03680665439797601,null,0.13640959375076997,0.1070862501102821,null,0.13640959375076997,-0.1401370266343255,null,0.06331190611440535,0.10925060882471374,null,0.06331190611440535,0.3062713594271183,null,0.06331190611440535,-0.391033593733103,null,0.06331190611440535,0.10114953458154916,null,0.06331190611440535,0.009904033766234614,null,0.06331190611440535,-0.05702463513022102,null,0.06331190611440535,-0.4156896382749921,null,0.06331190611440535,-0.13675601778564356,null,0.06331190611440535,-0.25999885017398866,null,0.06331190611440535,-0.5608169936589029,null,0.06331190611440535,0.04250134267242095,null,0.06331190611440535,0.2996301701333789,null,0.06331190611440535,0.30578357189033234,null,0.06331190611440535,0.4479145146138027,null,0.06331190611440535,0.1702663068464682,null,0.06331190611440535,0.0966653028950195,null,0.06331190611440535,0.27787266245253656,null,0.06331190611440535,0.5994292787718007,null,0.06331190611440535,0.1619806257717881,null,0.06331190611440535,0.17229006718757392,null,0.06331190611440535,0.1522386078728198,null,0.06331190611440535,0.028607302384825114,null,0.06331190611440535,0.009541222751769338,null,0.06331190611440535,0.2384491685558417,null,0.06331190611440535,-0.6225283015838625,null,0.06331190611440535,0.054509865551800964,null,0.06331190611440535,0.13640959375076997,null,0.06331190611440535,0.06331190611440535,null,0.06331190611440535,-0.009962916874576842,null,0.06331190611440535,0.29727836243286726,null,0.06331190611440535,0.060469593270392426,null,0.06331190611440535,0.005732050150491163,null,0.06331190611440535,-0.10562169416756789,null,0.06331190611440535,-0.2290384506135222,null,0.06331190611440535,0.18710599211209006,null,0.06331190611440535,-0.05023824362946272,null,0.06331190611440535,0.08943504044339054,null,0.06331190611440535,0.0990409072038064,null,0.06331190611440535,-0.48490439271789004,null,0.06331190611440535,0.6162309373296061,null,0.06331190611440535,0.40323468255758227,null,0.06331190611440535,0.09546776922438927,null,0.06331190611440535,0.18702689685163446,null,0.06331190611440535,0.1553988412896176,null,0.06331190611440535,0.11475423622127827,null,0.06331190611440535,0.16740434415095717,null,0.06331190611440535,0.09303599327940484,null,0.06331190611440535,0.08246961931843445,null,0.06331190611440535,-0.5362921051027204,null,0.06331190611440535,-0.1466512420273052,null,0.06331190611440535,-0.03473556596775076,null,0.06331190611440535,0.20237710916350318,null,0.06331190611440535,0.06319647783221378,null,0.06331190611440535,0.0815418005670714,null,0.06331190611440535,0.18626857936721591,null,0.06331190611440535,0.05703330561677692,null,0.06331190611440535,-0.050828039068373396,null,0.06331190611440535,0.002455406336435857,null,0.06331190611440535,0.12816576933029103,null,0.06331190611440535,0.042607347436113545,null,0.06331190611440535,0.09423993789426603,null,0.06331190611440535,0.018380342862312632,null,0.06331190611440535,-0.1403535076089,null,0.06331190611440535,0.06871192788841603,null,0.06331190611440535,-0.023952332668672964,null,0.06331190611440535,0.6038093389309235,null,0.06331190611440535,-0.22464023841064581,null,0.06331190611440535,0.6235258820011441,null,0.06331190611440535,0.3029539735812156,null,0.06331190611440535,0.04159092720090632,null,0.06331190611440535,-0.014793958827444862,null,0.06331190611440535,-0.09432934860948526,null,0.06331190611440535,-0.028474856328068943,null,0.06331190611440535,-0.017550494847514003,null,0.06331190611440535,-0.20176933670452085,null,0.06331190611440535,-0.03680665439797601,null,0.06331190611440535,0.026603559379496024,null,0.06331190611440535,-0.2558440596545207,null,0.18710599211209006,0.10925060882471374,null,0.18710599211209006,0.2996301701333789,null,0.18710599211209006,0.30578357189033234,null,0.18710599211209006,0.4479145146138027,null,0.18710599211209006,0.1702663068464682,null,0.18710599211209006,0.0966653028950195,null,0.18710599211209006,0.27787266245253656,null,0.18710599211209006,0.5994292787718007,null,0.18710599211209006,0.1619806257717881,null,0.18710599211209006,0.17229006718757392,null,0.18710599211209006,0.1522386078728198,null,0.18710599211209006,0.028607302384825114,null,0.18710599211209006,0.009541222751769338,null,0.18710599211209006,0.2384491685558417,null,0.18710599211209006,-0.6225283015838625,null,0.18710599211209006,0.054509865551800964,null,0.18710599211209006,0.13640959375076997,null,0.18710599211209006,0.06331190611440535,null,0.18710599211209006,0.060469593270392426,null,0.18710599211209006,0.005732050150491163,null,0.18710599211209006,-0.2290384506135222,null,0.18710599211209006,0.18710599211209006,null,0.18710599211209006,-0.05023824362946272,null,0.18710599211209006,0.08943504044339054,null,0.18710599211209006,0.0990409072038064,null,0.18710599211209006,0.6162309373296061,null,0.18710599211209006,0.09546776922438927,null,0.18710599211209006,0.18702689685163446,null,0.18710599211209006,0.11475423622127827,null,0.18710599211209006,0.16740434415095717,null,0.18710599211209006,0.09303599327940484,null,0.18710599211209006,0.08246961931843445,null,0.18710599211209006,-0.1466512420273052,null,0.18710599211209006,-0.03473556596775076,null,0.18710599211209006,0.20237710916350318,null,0.18710599211209006,0.06319647783221378,null,0.18710599211209006,0.0815418005670714,null,0.18710599211209006,0.05703330561677692,null,0.18710599211209006,0.002455406336435857,null,0.18710599211209006,0.12816576933029103,null,0.18710599211209006,-0.1403535076089,null,0.18710599211209006,0.06871192788841603,null,0.18710599211209006,-0.023952332668672964,null,0.18710599211209006,0.6038093389309235,null,0.18710599211209006,0.3029539735812156,null,0.18710599211209006,0.04159092720090632,null,0.18710599211209006,-0.014793958827444862,null,0.18710599211209006,-0.03680665439797601,null,0.20237710916350318,0.44809826233772243,null,0.20237710916350318,0.1522386078728198,null,0.20237710916350318,0.1553988412896176,null,0.20237710916350318,0.11475423622127827,null,0.20237710916350318,0.09303599327940484,null,0.20237710916350318,0.08246961931843445,null,0.20237710916350318,-0.5362921051027204,null,0.20237710916350318,-0.1466512420273052,null,0.20237710916350318,-0.03473556596775076,null,0.20237710916350318,0.20237710916350318,null,0.20237710916350318,0.06319647783221378,null,0.20237710916350318,0.0815418005670714,null,0.20237710916350318,0.18626857936721591,null,0.20237710916350318,0.05703330561677692,null,0.20237710916350318,0.002455406336435857,null,0.20237710916350318,0.12816576933029103,null,0.20237710916350318,-0.1403535076089,null,0.20237710916350318,0.06871192788841603,null,0.20237710916350318,-0.023952332668672964,null,0.20237710916350318,0.6038093389309235,null,0.20237710916350318,-0.22464023841064581,null,0.20237710916350318,0.3029539735812156,null,0.20237710916350318,0.04159092720090632,null,0.20237710916350318,0.026603559379496024,null,0.6243375484352359,0.6243375484352359,null,0.6243375484352359,0.04250134267242095,null,-0.23932521457913866,-0.3638443706291776,null,-0.23932521457913866,-0.23932521457913866,null,-0.23932521457913866,-0.391033593733103,null,-0.23932521457913866,0.10114953458154916,null,-0.23932521457913866,0.009904033766234614,null,-0.23932521457913866,-0.05702463513022102,null,-0.23932521457913866,-0.4156896382749921,null,-0.23932521457913866,-0.13675601778564356,null,-0.23932521457913866,-0.5608169936589029,null,-0.23932521457913866,0.060469593270392426,null,-0.23932521457913866,0.005732050150491163,null,-0.23932521457913866,-0.05023824362946272,null,-0.23932521457913866,0.0990409072038064,null,-0.23932521457913866,-0.03680665439797601,null,-0.23932521457913866,0.038054130471637145,null,-0.23932521457913866,-0.1728408574228859,null,0.1522386078728198,-0.2866206398705779,null,0.1522386078728198,0.09964779418926023,null,0.1522386078728198,0.08194952097500778,null,0.1522386078728198,0.395908758306365,null,0.1522386078728198,0.04250134267242095,null,0.1522386078728198,0.1522386078728198,null,0.1522386078728198,0.028607302384825114,null,0.1522386078728198,0.009541222751769338,null,0.1522386078728198,0.2384491685558417,null,0.1522386078728198,0.13640959375076997,null,0.1522386078728198,0.06331190611440535,null,0.1522386078728198,-0.05023824362946272,null,0.1522386078728198,0.09303599327940484,null,0.1522386078728198,0.08246961931843445,null,0.1522386078728198,-0.1466512420273052,null,0.1522386078728198,-0.03473556596775076,null,0.1522386078728198,0.20237710916350318,null,0.1522386078728198,0.06319647783221378,null,0.1522386078728198,0.002455406336435857,null,0.1522386078728198,0.12816576933029103,null,0.1522386078728198,0.042607347436113545,null,0.1522386078728198,0.018380342862312632,null,0.1522386078728198,-0.1403535076089,null,0.1522386078728198,0.06871192788841603,null,0.1522386078728198,-0.023952332668672964,null,0.1522386078728198,0.6038093389309235,null,0.1522386078728198,-0.22464023841064581,null,0.1522386078728198,0.3029539735812156,null,0.1522386078728198,0.04159092720090632,null,0.1522386078728198,-0.014793958827444862,null,0.1522386078728198,-0.03680665439797601,null,0.1522386078728198,0.04941418498127958,null,0.028607302384825114,0.09964779418926023,null,0.028607302384825114,0.395908758306365,null,0.028607302384825114,0.10925060882471374,null,0.028607302384825114,0.3062713594271183,null,0.028607302384825114,-0.4480922465360008,null,0.028607302384825114,0.44809826233772243,null,0.028607302384825114,-0.5608169936589029,null,0.028607302384825114,0.04250134267242095,null,0.028607302384825114,0.0966653028950195,null,0.028607302384825114,0.1522386078728198,null,0.028607302384825114,0.028607302384825114,null,0.028607302384825114,0.009541222751769338,null,0.028607302384825114,0.2384491685558417,null,0.028607302384825114,0.13640959375076997,null,0.028607302384825114,0.06331190611440535,null,0.028607302384825114,-0.009962916874576842,null,0.028607302384825114,0.29727836243286726,null,0.028607302384825114,0.060469593270392426,null,0.028607302384825114,0.005732050150491163,null,0.028607302384825114,-0.2290384506135222,null,0.028607302384825114,0.08943504044339054,null,0.028607302384825114,0.0990409072038064,null,0.028607302384825114,0.40323468255758227,null,0.028607302384825114,0.09303599327940484,null,0.028607302384825114,0.08246961931843445,null,0.028607302384825114,-0.1466512420273052,null,0.028607302384825114,0.20237710916350318,null,0.028607302384825114,0.06319647783221378,null,0.028607302384825114,0.0815418005670714,null,0.028607302384825114,0.18626857936721591,null,0.028607302384825114,0.05703330561677692,null,0.028607302384825114,0.002455406336435857,null,0.028607302384825114,0.12816576933029103,null,0.028607302384825114,0.042607347436113545,null,0.028607302384825114,0.09423993789426603,null,0.028607302384825114,0.6038093389309235,null,0.028607302384825114,0.3029539735812156,null,0.028607302384825114,0.04159092720090632,null,0.028607302384825114,0.027213243108594184,null,0.028607302384825114,-0.0015099583064107627,null,0.028607302384825114,-0.028474856328068943,null,0.028607302384825114,0.05591947480762767,null,0.028607302384825114,-0.012200878791194537,null,0.028607302384825114,-0.017550494847514003,null,0.028607302384825114,-0.20176933670452085,null,0.028607302384825114,-0.08876986711147754,null,0.028607302384825114,-0.03680665439797601,null,0.028607302384825114,-0.015070755974836,null,0.028607302384825114,-0.15459632707958687,null,0.028607302384825114,-0.1074320392108557,null,0.028607302384825114,0.04941418498127958,null,0.028607302384825114,-0.23178600151815423,null,0.028607302384825114,0.04837308531946771,null,0.028607302384825114,0.1070862501102821,null,0.028607302384825114,0.026603559379496024,null,0.028607302384825114,-0.1401370266343255,null,0.028607302384825114,-0.2558440596545207,null,-0.2290384506135222,-0.252855324788197,null,-0.2290384506135222,-0.30155487211560916,null,-0.2290384506135222,-0.10856284828320309,null,-0.2290384506135222,-0.6018103248944167,null,-0.2290384506135222,-0.06077115634072489,null,-0.2290384506135222,-0.08544256476651446,null,-0.2290384506135222,-0.5608169936589029,null,-0.2290384506135222,0.04250134267242095,null,-0.2290384506135222,0.1522386078728198,null,-0.2290384506135222,0.028607302384825114,null,-0.2290384506135222,0.06331190611440535,null,-0.2290384506135222,0.060469593270392426,null,-0.2290384506135222,0.005732050150491163,null,-0.2290384506135222,-0.10562169416756789,null,-0.2290384506135222,-0.2290384506135222,null,-0.2290384506135222,0.18710599211209006,null,-0.2290384506135222,-0.05023824362946272,null,-0.2290384506135222,0.0990409072038064,null,-0.2290384506135222,-0.48490439271789004,null,-0.2290384506135222,-0.20176933670452085,null,-0.014793958827444862,-0.252855324788197,null,-0.014793958827444862,-0.30155487211560916,null,-0.014793958827444862,-0.7438895986759475,null,-0.014793958827444862,-0.6087974890262643,null,-0.014793958827444862,-0.5359273360070705,null,-0.014793958827444862,-0.1864691045251891,null,-0.014793958827444862,-0.3638443706291776,null,-0.014793958827444862,-0.21938550868633475,null,-0.014793958827444862,0.23377042905798479,null,-0.014793958827444862,0.004771233449698027,null,-0.014793958827444862,0.39799096662722105,null,-0.014793958827444862,-0.6018103248944167,null,-0.014793958827444862,-0.06077115634072489,null,-0.014793958827444862,0.6243375484352359,null,-0.014793958827444862,-0.23932521457913866,null,-0.014793958827444862,-0.3627178006383887,null,-0.014793958827444862,-0.08544256476651446,null,-0.014793958827444862,0.09964779418926023,null,-0.014793958827444862,0.08194952097500778,null,-0.014793958827444862,0.33611693940702214,null,-0.014793958827444862,0.26779525913472657,null,-0.014793958827444862,-0.01979918442280888,null,-0.014793958827444862,0.44809826233772243,null,-0.014793958827444862,-0.13675601778564356,null,-0.014793958827444862,0.04250134267242095,null,-0.014793958827444862,0.1702663068464682,null,-0.014793958827444862,0.1619806257717881,null,-0.014793958827444862,0.17229006718757392,null,-0.014793958827444862,0.028607302384825114,null,-0.014793958827444862,0.009541222751769338,null,-0.014793958827444862,0.13640959375076997,null,-0.014793958827444862,0.06331190611440535,null,-0.014793958827444862,-0.009962916874576842,null,-0.014793958827444862,0.29727836243286726,null,-0.014793958827444862,0.060469593270392426,null,-0.014793958827444862,0.005732050150491163,null,-0.014793958827444862,-0.10562169416756789,null,-0.014793958827444862,-0.2290384506135222,null,-0.014793958827444862,0.18710599211209006,null,-0.014793958827444862,-0.05023824362946272,null,-0.014793958827444862,0.08943504044339054,null,-0.014793958827444862,0.0990409072038064,null,-0.014793958827444862,0.6162309373296061,null,-0.014793958827444862,0.40323468255758227,null,-0.014793958827444862,0.09546776922438927,null,-0.014793958827444862,0.18702689685163446,null,-0.014793958827444862,0.1553988412896176,null,-0.014793958827444862,0.11475423622127827,null,-0.014793958827444862,0.16740434415095717,null,-0.014793958827444862,0.09303599327940484,null,-0.014793958827444862,0.08246961931843445,null,-0.014793958827444862,-0.5362921051027204,null,-0.014793958827444862,-0.1466512420273052,null,-0.014793958827444862,-0.03473556596775076,null,-0.014793958827444862,0.20237710916350318,null,-0.014793958827444862,0.06319647783221378,null,-0.014793958827444862,0.0815418005670714,null,-0.014793958827444862,0.18626857936721591,null,-0.014793958827444862,0.05703330561677692,null,-0.014793958827444862,-0.050828039068373396,null,-0.014793958827444862,0.002455406336435857,null,-0.014793958827444862,0.12816576933029103,null,-0.014793958827444862,0.042607347436113545,null,-0.014793958827444862,0.09423993789426603,null,-0.014793958827444862,0.018380342862312632,null,-0.014793958827444862,-0.1403535076089,null,-0.014793958827444862,0.06871192788841603,null,-0.014793958827444862,-0.023952332668672964,null,-0.014793958827444862,0.6038093389309235,null,-0.014793958827444862,-0.22464023841064581,null,-0.014793958827444862,0.6235258820011441,null,-0.014793958827444862,0.3029539735812156,null,-0.014793958827444862,0.28867371863579067,null,-0.014793958827444862,0.04159092720090632,null,-0.014793958827444862,0.027213243108594184,null,-0.014793958827444862,-0.09432934860948526,null,-0.014793958827444862,-0.0015099583064107627,null,-0.014793958827444862,-0.028474856328068943,null,-0.014793958827444862,0.05591947480762767,null,-0.014793958827444862,-0.012200878791194537,null,-0.014793958827444862,-0.017550494847514003,null,-0.014793958827444862,-0.20176933670452085,null,-0.014793958827444862,-0.08876986711147754,null,-0.014793958827444862,-0.03680665439797601,null,-0.014793958827444862,-0.015070755974836,null,-0.014793958827444862,-0.15459632707958687,null,-0.014793958827444862,0.2108817413003818,null,-0.014793958827444862,-0.1074320392108557,null,-0.014793958827444862,-0.34076102287964954,null,-0.014793958827444862,0.04941418498127958,null,-0.014793958827444862,-0.23178600151815423,null,-0.014793958827444862,0.04837308531946771,null,-0.014793958827444862,0.1070862501102821,null,-0.014793958827444862,0.026603559379496024,null,-0.014793958827444862,-0.1401370266343255,null,-0.014793958827444862,-0.2558440596545207,null,-0.014793958827444862,-0.1728408574228859,null,-0.09432934860948526,0.09964779418926023,null,-0.09432934860948526,0.08194952097500778,null,-0.09432934860948526,0.395908758306365,null,-0.09432934860948526,0.3062713594271183,null,-0.09432934860948526,-0.009962916874576842,null,-0.09432934860948526,0.29727836243286726,null,-0.09432934860948526,-0.014793958827444862,null,-0.09432934860948526,0.027213243108594184,null,-0.09432934860948526,-0.09432934860948526,null,-0.09432934860948526,-0.0015099583064107627,null,-0.09432934860948526,-0.028474856328068943,null,-0.09432934860948526,0.05591947480762767,null,-0.09432934860948526,-0.012200878791194537,null,-0.09432934860948526,-0.017550494847514003,null,-0.09432934860948526,-0.20176933670452085,null,-0.09432934860948526,-0.08876986711147754,null,-0.09432934860948526,-0.03680665439797601,null,-0.09432934860948526,0.038054130471637145,null,-0.09432934860948526,-0.015070755974836,null,-0.09432934860948526,-0.15459632707958687,null,-0.09432934860948526,-0.1074320392108557,null,-0.09432934860948526,-0.23178600151815423,null,-0.09432934860948526,0.04837308531946771,null,-0.09432934860948526,0.1070862501102821,null,-0.09432934860948526,0.026603559379496024,null,-0.09432934860948526,-0.1401370266343255,null,-0.09432934860948526,-0.2558440596545207,null,-0.09432934860948526,-0.1728408574228859,null,-0.028474856328068943,-0.252855324788197,null,-0.028474856328068943,-0.30155487211560916,null,-0.028474856328068943,-0.7438895986759475,null,-0.028474856328068943,-0.6087974890262643,null,-0.028474856328068943,-0.5359273360070705,null,-0.028474856328068943,-0.1864691045251891,null,-0.028474856328068943,-0.3638443706291776,null,-0.028474856328068943,-0.21938550868633475,null,-0.028474856328068943,0.23377042905798479,null,-0.028474856328068943,-0.10856284828320309,null,-0.028474856328068943,0.004771233449698027,null,-0.028474856328068943,-0.18386033908940683,null,-0.028474856328068943,0.39799096662722105,null,-0.028474856328068943,0.16764997014744862,null,-0.028474856328068943,-0.6018103248944167,null,-0.028474856328068943,-0.06077115634072489,null,-0.028474856328068943,0.6243375484352359,null,-0.028474856328068943,-0.23932521457913866,null,-0.028474856328068943,-0.3627178006383887,null,-0.028474856328068943,-0.08544256476651446,null,-0.028474856328068943,-0.2866206398705779,null,-0.028474856328068943,-0.37304752842516714,null,-0.028474856328068943,-0.15063312761817263,null,-0.028474856328068943,-0.15814644299407177,null,-0.028474856328068943,0.09964779418926023,null,-0.028474856328068943,-0.29463327425416364,null,-0.028474856328068943,0.08194952097500778,null,-0.028474856328068943,-0.1690975117806332,null,-0.028474856328068943,0.28584750360020167,null,-0.028474856328068943,0.33611693940702214,null,-0.028474856328068943,0.395908758306365,null,-0.028474856328068943,0.10925060882471374,null,-0.028474856328068943,0.26779525913472657,null,-0.028474856328068943,-0.01979918442280888,null,-0.028474856328068943,0.3062713594271183,null,-0.028474856328068943,-0.4480922465360008,null,-0.028474856328068943,0.04250134267242095,null,-0.028474856328068943,0.2996301701333789,null,-0.028474856328068943,0.30578357189033234,null,-0.028474856328068943,0.4479145146138027,null,-0.028474856328068943,0.0966653028950195,null,-0.028474856328068943,0.27787266245253656,null,-0.028474856328068943,0.5994292787718007,null,-0.028474856328068943,0.1619806257717881,null,-0.028474856328068943,0.17229006718757392,null,-0.028474856328068943,0.1522386078728198,null,-0.028474856328068943,0.028607302384825114,null,-0.028474856328068943,0.009541222751769338,null,-0.028474856328068943,0.2384491685558417,null,-0.028474856328068943,-0.6225283015838625,null,-0.028474856328068943,0.054509865551800964,null,-0.028474856328068943,0.13640959375076997,null,-0.028474856328068943,0.06331190611440535,null,-0.028474856328068943,-0.009962916874576842,null,-0.028474856328068943,0.29727836243286726,null,-0.028474856328068943,0.060469593270392426,null,-0.028474856328068943,0.005732050150491163,null,-0.028474856328068943,-0.10562169416756789,null,-0.028474856328068943,-0.2290384506135222,null,-0.028474856328068943,0.18710599211209006,null,-0.028474856328068943,-0.05023824362946272,null,-0.028474856328068943,0.08943504044339054,null,-0.028474856328068943,0.0990409072038064,null,-0.028474856328068943,-0.48490439271789004,null,-0.028474856328068943,0.6162309373296061,null,-0.028474856328068943,0.40323468255758227,null,-0.028474856328068943,0.09546776922438927,null,-0.028474856328068943,0.18702689685163446,null,-0.028474856328068943,0.1553988412896176,null,-0.028474856328068943,0.11475423622127827,null,-0.028474856328068943,0.16740434415095717,null,-0.028474856328068943,0.09303599327940484,null,-0.028474856328068943,0.08246961931843445,null,-0.028474856328068943,-0.5362921051027204,null,-0.028474856328068943,-0.1466512420273052,null,-0.028474856328068943,-0.03473556596775076,null,-0.028474856328068943,0.20237710916350318,null,-0.028474856328068943,0.06319647783221378,null,-0.028474856328068943,0.0815418005670714,null,-0.028474856328068943,0.18626857936721591,null,-0.028474856328068943,0.05703330561677692,null,-0.028474856328068943,-0.050828039068373396,null,-0.028474856328068943,0.002455406336435857,null,-0.028474856328068943,0.12816576933029103,null,-0.028474856328068943,0.042607347436113545,null,-0.028474856328068943,0.09423993789426603,null,-0.028474856328068943,0.018380342862312632,null,-0.028474856328068943,-0.1403535076089,null,-0.028474856328068943,0.06871192788841603,null,-0.028474856328068943,-0.023952332668672964,null,-0.028474856328068943,0.6038093389309235,null,-0.028474856328068943,-0.22464023841064581,null,-0.028474856328068943,0.6235258820011441,null,-0.028474856328068943,0.3029539735812156,null,-0.028474856328068943,0.28867371863579067,null,-0.028474856328068943,0.04159092720090632,null,-0.028474856328068943,-0.014793958827444862,null,-0.028474856328068943,0.027213243108594184,null,-0.028474856328068943,-0.09432934860948526,null,-0.028474856328068943,-0.0015099583064107627,null,-0.028474856328068943,-0.028474856328068943,null,-0.028474856328068943,0.05591947480762767,null,-0.028474856328068943,-0.012200878791194537,null,-0.028474856328068943,-0.017550494847514003,null,-0.028474856328068943,-0.20176933670452085,null,-0.028474856328068943,-0.08876986711147754,null,-0.028474856328068943,-0.03680665439797601,null,-0.028474856328068943,0.038054130471637145,null,-0.028474856328068943,-0.015070755974836,null,-0.028474856328068943,-0.15459632707958687,null,-0.028474856328068943,-0.1074320392108557,null,-0.028474856328068943,-0.34076102287964954,null,-0.028474856328068943,0.04941418498127958,null,-0.028474856328068943,-0.23178600151815423,null,-0.028474856328068943,0.04837308531946771,null,-0.028474856328068943,0.1070862501102821,null,-0.028474856328068943,0.026603559379496024,null,-0.028474856328068943,-0.1401370266343255,null,-0.028474856328068943,-0.2558440596545207,null,-0.028474856328068943,-0.1728408574228859,null,0.04159092720090632,0.09964779418926023,null,0.04159092720090632,0.08194952097500778,null,0.04159092720090632,0.395908758306365,null,0.04159092720090632,-0.01979918442280888,null,0.04159092720090632,0.3062713594271183,null,0.04159092720090632,-0.4480922465360008,null,0.04159092720090632,0.5994292787718007,null,0.04159092720090632,0.17229006718757392,null,0.04159092720090632,0.1522386078728198,null,0.04159092720090632,0.2384491685558417,null,0.04159092720090632,-0.6225283015838625,null,0.04159092720090632,0.13640959375076997,null,0.04159092720090632,0.06331190611440535,null,0.04159092720090632,-0.009962916874576842,null,0.04159092720090632,0.0990409072038064,null,0.04159092720090632,0.11475423622127827,null,0.04159092720090632,0.16740434415095717,null,0.04159092720090632,0.09303599327940484,null,0.04159092720090632,0.08246961931843445,null,0.04159092720090632,-0.5362921051027204,null,0.04159092720090632,-0.1466512420273052,null,0.04159092720090632,-0.03473556596775076,null,0.04159092720090632,0.20237710916350318,null,0.04159092720090632,0.06319647783221378,null,0.04159092720090632,0.0815418005670714,null,0.04159092720090632,0.18626857936721591,null,0.04159092720090632,0.05703330561677692,null,0.04159092720090632,0.002455406336435857,null,0.04159092720090632,0.12816576933029103,null,0.04159092720090632,0.042607347436113545,null,0.04159092720090632,0.09423993789426603,null,0.04159092720090632,0.018380342862312632,null,0.04159092720090632,-0.023952332668672964,null,0.04159092720090632,0.6038093389309235,null,0.04159092720090632,-0.22464023841064581,null,0.04159092720090632,0.6235258820011441,null,0.04159092720090632,0.3029539735812156,null,0.04159092720090632,0.28867371863579067,null,0.04159092720090632,0.04159092720090632,null,0.04159092720090632,-0.014793958827444862,null,0.04159092720090632,0.027213243108594184,null,0.04159092720090632,-0.0015099583064107627,null,0.04159092720090632,-0.028474856328068943,null,0.04159092720090632,0.05591947480762767,null,0.04159092720090632,-0.012200878791194537,null,0.04159092720090632,-0.017550494847514003,null,0.04159092720090632,-0.20176933670452085,null,0.04159092720090632,-0.08876986711147754,null,0.04159092720090632,-0.03680665439797601,null,0.04159092720090632,-0.015070755974836,null,0.04159092720090632,-0.15459632707958687,null,0.04159092720090632,0.04941418498127958,null,0.04159092720090632,0.04837308531946771,null,0.04159092720090632,0.1070862501102821,null,0.04159092720090632,0.026603559379496024,null,0.04159092720090632,-0.1401370266343255,null,0.04159092720090632,-0.2558440596545207,null,-0.29463327425416364,-0.29463327425416364,null,-0.29463327425416364,-0.05702463513022102,null,-0.29463327425416364,-0.13675601778564356,null,-0.29463327425416364,-0.25999885017398866,null,-0.29463327425416364,-0.5608169936589029,null,-0.29463327425416364,0.060469593270392426,null,-0.29463327425416364,0.005732050150491163,null,-0.29463327425416364,-0.2290384506135222,null,-0.29463327425416364,0.18710599211209006,null,-0.29463327425416364,-0.05023824362946272,null,-0.29463327425416364,0.0990409072038064,null,-0.29463327425416364,-0.48490439271789004,null,-0.29463327425416364,-0.03680665439797601,null,-0.29463327425416364,0.038054130471637145,null,-0.6225283015838625,0.08194952097500778,null,0.09964779418926023,-0.13675601778564356,null,0.09964779418926023,-0.25999885017398866,null,0.09964779418926023,0.04250134267242095,null,0.09964779418926023,0.27787266245253656,null,0.09964779418926023,0.1619806257717881,null,0.09964779418926023,0.1522386078728198,null,0.09964779418926023,0.028607302384825114,null,0.09964779418926023,0.009541222751769338,null,0.09964779418926023,0.2384491685558417,null,0.09964779418926023,0.13640959375076997,null,0.09964779418926023,0.06331190611440535,null,0.09964779418926023,0.060469593270392426,null,0.09964779418926023,0.005732050150491163,null,0.09964779418926023,-0.2290384506135222,null,0.09964779418926023,0.18710599211209006,null,0.09964779418926023,-0.05023824362946272,null,0.09964779418926023,0.08943504044339054,null,0.09964779418926023,0.0990409072038064,null,0.09964779418926023,-0.48490439271789004,null,0.09964779418926023,0.6162309373296061,null,0.09964779418926023,0.09546776922438927,null,0.09964779418926023,0.09303599327940484,null,0.09964779418926023,0.20237710916350318,null,0.09964779418926023,0.12816576933029103,null,0.09964779418926023,-0.22464023841064581,null,0.09964779418926023,0.04159092720090632,null,0.09964779418926023,-0.014793958827444862,null,0.09964779418926023,-0.03680665439797601,null,0.009541222751769338,0.09964779418926023,null,0.009541222751769338,0.395908758306365,null,0.009541222751769338,0.3062713594271183,null,0.009541222751769338,-0.5608169936589029,null,0.009541222751769338,0.028607302384825114,null,0.009541222751769338,0.009541222751769338,null,0.009541222751769338,-0.009962916874576842,null,0.009541222751769338,-0.05023824362946272,null,0.009541222751769338,0.06319647783221378,null,0.009541222751769338,0.027213243108594184,null,0.009541222751769338,-0.0015099583064107627,null,0.009541222751769338,0.05591947480762767,null,0.009541222751769338,-0.012200878791194537,null,0.009541222751769338,-0.017550494847514003,null,0.009541222751769338,-0.20176933670452085,null,0.009541222751769338,-0.015070755974836,null,0.009541222751769338,0.026603559379496024,null,0.2384491685558417,0.33611693940702214,null,0.2384491685558417,0.395908758306365,null,0.2384491685558417,0.10925060882471374,null,0.2384491685558417,0.26779525913472657,null,0.2384491685558417,0.44809826233772243,null,0.2384491685558417,0.1522386078728198,null,0.2384491685558417,0.2384491685558417,null,0.2384491685558417,0.09303599327940484,null,0.2384491685558417,-0.5362921051027204,null,0.2384491685558417,0.20237710916350318,null,0.2384491685558417,0.09423993789426603,null,0.2384491685558417,0.018380342862312632,null,0.2384491685558417,0.06871192788841603,null,0.2384491685558417,0.6038093389309235,null,0.2384491685558417,0.04159092720090632,null,0.2384491685558417,-0.014793958827444862,null,0.2384491685558417,0.05591947480762767,null,0.2384491685558417,-0.20176933670452085,null,0.2384491685558417,0.1070862501102821,null,0.2384491685558417,0.026603559379496024,null,0.6162309373296061,0.6162309373296061,null,0.6162309373296061,0.40323468255758227,null,0.6162309373296061,0.09546776922438927,null,0.6162309373296061,-0.014793958827444862,null,0.09546776922438927,-0.391033593733103,null,0.09546776922438927,0.10114953458154916,null,0.09546776922438927,-0.5608169936589029,null,0.09546776922438927,0.04250134267242095,null,0.09546776922438927,0.1522386078728198,null,0.09546776922438927,0.2384491685558417,null,0.09546776922438927,0.13640959375076997,null,0.09546776922438927,0.06331190611440535,null,0.09546776922438927,-0.05023824362946272,null,0.09546776922438927,0.0990409072038064,null,0.09546776922438927,0.6162309373296061,null,0.09546776922438927,0.40323468255758227,null,0.09546776922438927,0.09546776922438927,null,0.09546776922438927,0.18702689685163446,null,0.09546776922438927,0.1553988412896176,null,0.09546776922438927,0.11475423622127827,null,0.09546776922438927,0.16740434415095717,null,0.09546776922438927,0.09303599327940484,null,0.09546776922438927,0.08246961931843445,null,0.09546776922438927,-0.1466512420273052,null,0.09546776922438927,-0.03473556596775076,null,0.09546776922438927,0.20237710916350318,null,0.09546776922438927,0.06319647783221378,null,0.09546776922438927,0.0815418005670714,null,0.09546776922438927,0.18626857936721591,null,0.09546776922438927,0.05703330561677692,null,0.09546776922438927,0.002455406336435857,null,0.09546776922438927,0.12816576933029103,null,0.09546776922438927,0.042607347436113545,null,0.09546776922438927,0.09423993789426603,null,0.09546776922438927,-0.1403535076089,null,0.09546776922438927,0.3029539735812156,null,0.09546776922438927,0.04159092720090632,null,0.09546776922438927,-0.014793958827444862,null,0.09303599327940484,0.09964779418926023,null,0.09303599327940484,0.33611693940702214,null,0.09303599327940484,0.3062713594271183,null,0.09303599327940484,0.2384491685558417,null,0.09303599327940484,0.06331190611440535,null,0.09303599327940484,-0.009962916874576842,null,0.09303599327940484,0.29727836243286726,null,0.09303599327940484,0.060469593270392426,null,0.09303599327940484,0.005732050150491163,null,0.09303599327940484,-0.2290384506135222,null,0.09303599327940484,0.18710599211209006,null,0.09303599327940484,0.0990409072038064,null,0.09303599327940484,-0.48490439271789004,null,0.09303599327940484,0.09546776922438927,null,0.09303599327940484,0.18702689685163446,null,0.09303599327940484,0.1553988412896176,null,0.09303599327940484,0.11475423622127827,null,0.09303599327940484,0.16740434415095717,null,0.09303599327940484,0.09303599327940484,null,0.09303599327940484,0.08246961931843445,null,0.09303599327940484,-0.5362921051027204,null,0.09303599327940484,-0.1466512420273052,null,0.09303599327940484,-0.03473556596775076,null,0.09303599327940484,0.20237710916350318,null,0.09303599327940484,0.06319647783221378,null,0.09303599327940484,0.0815418005670714,null,0.09303599327940484,0.18626857936721591,null,0.09303599327940484,0.05703330561677692,null,0.09303599327940484,0.002455406336435857,null,0.09303599327940484,0.12816576933029103,null,0.09303599327940484,0.042607347436113545,null,0.09303599327940484,0.09423993789426603,null,0.09303599327940484,-0.1403535076089,null,0.09303599327940484,-0.023952332668672964,null,0.09303599327940484,0.6038093389309235,null,0.09303599327940484,-0.22464023841064581,null,0.09303599327940484,0.3029539735812156,null,0.09303599327940484,0.28867371863579067,null,0.09303599327940484,0.04159092720090632,null,0.09303599327940484,-0.014793958827444862,null,0.12816576933029103,0.395908758306365,null,0.12816576933029103,-0.05702463513022102,null,0.12816576933029103,0.1619806257717881,null,0.12816576933029103,0.2384491685558417,null,0.12816576933029103,0.054509865551800964,null,0.12816576933029103,-0.009962916874576842,null,0.12816576933029103,0.18710599211209006,null,0.12816576933029103,-0.05023824362946272,null,0.12816576933029103,0.0990409072038064,null,0.12816576933029103,0.09546776922438927,null,0.12816576933029103,0.11475423622127827,null,0.12816576933029103,0.09303599327940484,null,0.12816576933029103,0.08246961931843445,null,0.12816576933029103,-0.1466512420273052,null,0.12816576933029103,-0.03473556596775076,null,0.12816576933029103,0.20237710916350318,null,0.12816576933029103,0.06319647783221378,null,0.12816576933029103,0.0815418005670714,null,0.12816576933029103,0.18626857936721591,null,0.12816576933029103,0.05703330561677692,null,0.12816576933029103,-0.050828039068373396,null,0.12816576933029103,0.002455406336435857,null,0.12816576933029103,0.12816576933029103,null,0.12816576933029103,0.042607347436113545,null,0.12816576933029103,0.09423993789426603,null,0.12816576933029103,0.018380342862312632,null,0.12816576933029103,-0.1403535076089,null,0.12816576933029103,0.06871192788841603,null,0.12816576933029103,0.3029539735812156,null,0.12816576933029103,0.04159092720090632,null,0.12816576933029103,0.027213243108594184,null,0.12816576933029103,-0.028474856328068943,null,0.12816576933029103,0.05591947480762767,null,0.12816576933029103,-0.012200878791194537,null,0.12816576933029103,-0.017550494847514003,null,0.12816576933029103,-0.20176933670452085,null,0.12816576933029103,-0.08876986711147754,null,0.12816576933029103,-0.015070755974836,null,0.12816576933029103,0.04941418498127958,null,0.12816576933029103,0.026603559379496024,null,-0.22464023841064581,-0.06077115634072489,null,-0.22464023841064581,-0.23932521457913866,null,-0.22464023841064581,-0.3627178006383887,null,-0.22464023841064581,-0.08544256476651446,null,-0.22464023841064581,0.009541222751769338,null,-0.22464023841064581,0.2384491685558417,null,-0.22464023841064581,0.18710599211209006,null,-0.22464023841064581,-0.05023824362946272,null,-0.22464023841064581,0.0990409072038064,null,-0.22464023841064581,0.04159092720090632,null,-0.22464023841064581,0.04837308531946771,null,-0.22464023841064581,-0.2558440596545207,null,0.08194952097500778,0.08194952097500778,null,0.08194952097500778,0.10925060882471374,null,0.08194952097500778,-0.01979918442280888,null,0.08194952097500778,0.009904033766234614,null,0.08194952097500778,-0.05702463513022102,null,0.08194952097500778,-0.4156896382749921,null,0.08194952097500778,-0.13675601778564356,null,0.08194952097500778,-0.5608169936589029,null,0.08194952097500778,0.04250134267242095,null,0.08194952097500778,0.2996301701333789,null,0.08194952097500778,0.30578357189033234,null,0.08194952097500778,0.4479145146138027,null,0.08194952097500778,0.1702663068464682,null,0.08194952097500778,0.0966653028950195,null,0.08194952097500778,0.27787266245253656,null,0.08194952097500778,0.5994292787718007,null,0.08194952097500778,0.1619806257717881,null,0.08194952097500778,0.17229006718757392,null,0.08194952097500778,0.1522386078728198,null,0.08194952097500778,0.028607302384825114,null,0.08194952097500778,0.009541222751769338,null,0.08194952097500778,0.054509865551800964,null,0.08194952097500778,0.13640959375076997,null,0.08194952097500778,0.06331190611440535,null,0.08194952097500778,-0.009962916874576842,null,0.08194952097500778,0.29727836243286726,null,0.08194952097500778,0.060469593270392426,null,0.08194952097500778,0.005732050150491163,null,0.08194952097500778,-0.10562169416756789,null,0.08194952097500778,-0.2290384506135222,null,0.08194952097500778,0.18710599211209006,null,0.08194952097500778,-0.05023824362946272,null,0.08194952097500778,0.08943504044339054,null,0.08194952097500778,0.0990409072038064,null,0.08194952097500778,-0.48490439271789004,null,0.08194952097500778,0.6162309373296061,null,0.08194952097500778,0.40323468255758227,null,0.08194952097500778,0.09546776922438927,null,0.08194952097500778,0.18702689685163446,null,0.08194952097500778,0.1553988412896176,null,0.08194952097500778,0.11475423622127827,null,0.08194952097500778,0.16740434415095717,null,0.08194952097500778,0.09303599327940484,null,0.08194952097500778,0.08246961931843445,null,0.08194952097500778,-0.5362921051027204,null,0.08194952097500778,-0.1466512420273052,null,0.08194952097500778,0.20237710916350318,null,0.08194952097500778,0.06319647783221378,null,0.08194952097500778,0.3029539735812156,null,0.08194952097500778,0.28867371863579067,null,0.08194952097500778,0.04159092720090632,null,0.08194952097500778,0.027213243108594184,null,0.08194952097500778,-0.09432934860948526,null,0.08194952097500778,-0.0015099583064107627,null,0.08194952097500778,-0.03680665439797601,null,0.10925060882471374,0.6162309373296061,null,0.10925060882471374,0.16740434415095717,null,0.10925060882471374,0.08246961931843445,null,0.10925060882471374,0.20237710916350318,null,0.10925060882471374,0.3029539735812156,null,0.10925060882471374,0.28867371863579067,null,0.10925060882471374,0.04159092720090632,null,-0.01979918442280888,0.18702689685163446,null,-0.01979918442280888,0.1553988412896176,null,-0.01979918442280888,0.11475423622127827,null,-0.01979918442280888,0.16740434415095717,null,-0.01979918442280888,0.08246961931843445,null,-0.01979918442280888,-0.5362921051027204,null,-0.01979918442280888,-0.1466512420273052,null,-0.01979918442280888,-0.03473556596775076,null,-0.01979918442280888,0.20237710916350318,null,-0.01979918442280888,0.06319647783221378,null,-0.01979918442280888,0.002455406336435857,null,-0.01979918442280888,0.12816576933029103,null,-0.01979918442280888,0.3029539735812156,null,-0.01979918442280888,0.28867371863579067,null,-0.01979918442280888,0.04159092720090632,null,-0.009962916874576842,-0.252855324788197,null,-0.009962916874576842,-0.30155487211560916,null,-0.009962916874576842,-0.7438895986759475,null,-0.009962916874576842,-0.6087974890262643,null,-0.009962916874576842,-0.5359273360070705,null,-0.009962916874576842,-0.1864691045251891,null,-0.009962916874576842,-0.3638443706291776,null,-0.009962916874576842,-0.21938550868633475,null,-0.009962916874576842,0.23377042905798479,null,-0.009962916874576842,-0.10856284828320309,null,-0.009962916874576842,0.004771233449698027,null,-0.009962916874576842,-0.18386033908940683,null,-0.009962916874576842,0.39799096662722105,null,-0.009962916874576842,0.16764997014744862,null,-0.009962916874576842,-0.6018103248944167,null,-0.009962916874576842,-0.06077115634072489,null,-0.009962916874576842,0.6243375484352359,null,-0.009962916874576842,-0.23932521457913866,null,-0.009962916874576842,-0.3627178006383887,null,-0.009962916874576842,-0.08544256476651446,null,-0.009962916874576842,0.09964779418926023,null,-0.009962916874576842,-0.29463327425416364,null,-0.009962916874576842,0.08194952097500778,null,-0.009962916874576842,-0.1690975117806332,null,-0.009962916874576842,0.28584750360020167,null,-0.009962916874576842,0.33611693940702214,null,-0.009962916874576842,0.395908758306365,null,-0.009962916874576842,0.10925060882471374,null,-0.009962916874576842,0.26779525913472657,null,-0.009962916874576842,-0.01979918442280888,null,-0.009962916874576842,0.3062713594271183,null,-0.009962916874576842,-0.4480922465360008,null,-0.009962916874576842,0.44809826233772243,null,-0.009962916874576842,-0.391033593733103,null,-0.009962916874576842,0.10114953458154916,null,-0.009962916874576842,0.009904033766234614,null,-0.009962916874576842,-0.05702463513022102,null,-0.009962916874576842,-0.4156896382749921,null,-0.009962916874576842,-0.13675601778564356,null,-0.009962916874576842,-0.25999885017398866,null,-0.009962916874576842,-0.5608169936589029,null,-0.009962916874576842,0.04250134267242095,null,-0.009962916874576842,0.2996301701333789,null,-0.009962916874576842,0.30578357189033234,null,-0.009962916874576842,0.4479145146138027,null,-0.009962916874576842,0.1702663068464682,null,-0.009962916874576842,0.0966653028950195,null,-0.009962916874576842,0.27787266245253656,null,-0.009962916874576842,0.5994292787718007,null,-0.009962916874576842,0.1619806257717881,null,-0.009962916874576842,0.17229006718757392,null,-0.009962916874576842,0.1522386078728198,null,-0.009962916874576842,0.028607302384825114,null,-0.009962916874576842,0.009541222751769338,null,-0.009962916874576842,0.2384491685558417,null,-0.009962916874576842,-0.6225283015838625,null,-0.009962916874576842,0.054509865551800964,null,-0.009962916874576842,0.13640959375076997,null,-0.009962916874576842,0.06331190611440535,null,-0.009962916874576842,-0.009962916874576842,null,-0.009962916874576842,0.29727836243286726,null,-0.009962916874576842,0.060469593270392426,null,-0.009962916874576842,0.005732050150491163,null,-0.009962916874576842,-0.10562169416756789,null,-0.009962916874576842,-0.2290384506135222,null,-0.009962916874576842,0.18710599211209006,null,-0.009962916874576842,-0.05023824362946272,null,-0.009962916874576842,0.08943504044339054,null,-0.009962916874576842,0.0990409072038064,null,-0.009962916874576842,-0.48490439271789004,null,-0.009962916874576842,0.6162309373296061,null,-0.009962916874576842,0.40323468255758227,null,-0.009962916874576842,0.09546776922438927,null,-0.009962916874576842,0.18702689685163446,null,-0.009962916874576842,0.1553988412896176,null,-0.009962916874576842,0.11475423622127827,null,-0.009962916874576842,0.16740434415095717,null,-0.009962916874576842,0.09303599327940484,null,-0.009962916874576842,0.08246961931843445,null,-0.009962916874576842,-0.5362921051027204,null,-0.009962916874576842,-0.1466512420273052,null,-0.009962916874576842,-0.03473556596775076,null,-0.009962916874576842,0.20237710916350318,null,-0.009962916874576842,0.06319647783221378,null,-0.009962916874576842,0.0815418005670714,null,-0.009962916874576842,0.18626857936721591,null,-0.009962916874576842,0.05703330561677692,null,-0.009962916874576842,-0.050828039068373396,null,-0.009962916874576842,0.002455406336435857,null,-0.009962916874576842,0.12816576933029103,null,-0.009962916874576842,0.042607347436113545,null,-0.009962916874576842,0.09423993789426603,null,-0.009962916874576842,0.018380342862312632,null,-0.009962916874576842,-0.1403535076089,null,-0.009962916874576842,0.06871192788841603,null,-0.009962916874576842,-0.023952332668672964,null,-0.009962916874576842,0.6038093389309235,null,-0.009962916874576842,-0.22464023841064581,null,-0.009962916874576842,0.6235258820011441,null,-0.009962916874576842,0.3029539735812156,null,-0.009962916874576842,0.28867371863579067,null,-0.009962916874576842,0.04159092720090632,null,-0.009962916874576842,-0.014793958827444862,null,-0.009962916874576842,0.027213243108594184,null,-0.009962916874576842,-0.09432934860948526,null,-0.009962916874576842,-0.0015099583064107627,null,-0.009962916874576842,-0.028474856328068943,null,-0.009962916874576842,0.05591947480762767,null,-0.009962916874576842,-0.012200878791194537,null,-0.009962916874576842,-0.017550494847514003,null,-0.009962916874576842,-0.20176933670452085,null,-0.009962916874576842,-0.08876986711147754,null,-0.009962916874576842,-0.03680665439797601,null,-0.009962916874576842,0.038054130471637145,null,-0.009962916874576842,-0.015070755974836,null,-0.009962916874576842,-0.15459632707958687,null,-0.009962916874576842,-0.1074320392108557,null,-0.009962916874576842,0.04941418498127958,null,-0.009962916874576842,-0.23178600151815423,null,-0.009962916874576842,0.04837308531946771,null,-0.009962916874576842,0.1070862501102821,null,-0.009962916874576842,0.026603559379496024,null,-0.009962916874576842,-0.1401370266343255,null,-0.009962916874576842,-0.2558440596545207,null,0.29727836243286726,0.29727836243286726,null,0.29727836243286726,0.09546776922438927,null,0.29727836243286726,0.18702689685163446,null,0.29727836243286726,0.1553988412896176,null,0.29727836243286726,0.11475423622127827,null,0.29727836243286726,0.16740434415095717,null,0.29727836243286726,0.08246961931843445,null,0.29727836243286726,-0.1403535076089,null,0.29727836243286726,-0.014793958827444862,null,0.29727836243286726,0.027213243108594184,null,0.40323468255758227,0.6162309373296061,null,0.40323468255758227,0.40323468255758227,null,0.40323468255758227,0.09546776922438927,null,0.40323468255758227,0.16740434415095717,null,0.40323468255758227,0.08246961931843445,null,0.40323468255758227,-0.1403535076089,null,0.40323468255758227,0.3029539735812156,null,0.40323468255758227,0.04159092720090632,null,0.40323468255758227,-0.014793958827444862,null,0.18702689685163446,0.1522386078728198,null,0.18702689685163446,0.13640959375076997,null,0.18702689685163446,0.06331190611440535,null,0.18702689685163446,-0.2290384506135222,null,0.18702689685163446,0.09546776922438927,null,0.18702689685163446,0.18702689685163446,null,0.18702689685163446,0.1553988412896176,null,0.18702689685163446,0.11475423622127827,null,0.18702689685163446,0.16740434415095717,null,0.18702689685163446,0.09303599327940484,null,0.18702689685163446,0.08246961931843445,null,0.18702689685163446,-0.5362921051027204,null,0.18702689685163446,-0.1466512420273052,null,0.18702689685163446,-0.03473556596775076,null,0.18702689685163446,0.20237710916350318,null,0.18702689685163446,0.06319647783221378,null,0.18702689685163446,0.0815418005670714,null,0.18702689685163446,0.18626857936721591,null,0.18702689685163446,0.05703330561677692,null,0.18702689685163446,0.002455406336435857,null,0.18702689685163446,0.12816576933029103,null,0.18702689685163446,0.09423993789426603,null,0.18702689685163446,0.018380342862312632,null,0.18702689685163446,-0.1403535076089,null,0.18702689685163446,0.06871192788841603,null,0.18702689685163446,-0.023952332668672964,null,0.18702689685163446,0.6038093389309235,null,0.18702689685163446,-0.22464023841064581,null,0.18702689685163446,0.6235258820011441,null,0.18702689685163446,0.3029539735812156,null,0.18702689685163446,0.04159092720090632,null,0.18702689685163446,-0.014793958827444862,null,0.18702689685163446,-0.03680665439797601,null,0.1553988412896176,0.1522386078728198,null,0.1553988412896176,0.2384491685558417,null,0.1553988412896176,0.13640959375076997,null,0.1553988412896176,0.06331190611440535,null,0.1553988412896176,0.060469593270392426,null,0.1553988412896176,0.005732050150491163,null,0.1553988412896176,-0.2290384506135222,null,0.1553988412896176,0.18710599211209006,null,0.1553988412896176,-0.05023824362946272,null,0.1553988412896176,0.08943504044339054,null,0.1553988412896176,0.0990409072038064,null,0.1553988412896176,0.09546776922438927,null,0.1553988412896176,0.18702689685163446,null,0.1553988412896176,0.1553988412896176,null,0.1553988412896176,0.11475423622127827,null,0.1553988412896176,0.16740434415095717,null,0.1553988412896176,0.09303599327940484,null,0.1553988412896176,0.08246961931843445,null,0.1553988412896176,-0.5362921051027204,null,0.1553988412896176,-0.1466512420273052,null,0.1553988412896176,-0.03473556596775076,null,0.1553988412896176,0.20237710916350318,null,0.1553988412896176,0.06319647783221378,null,0.1553988412896176,0.0815418005670714,null,0.1553988412896176,0.18626857936721591,null,0.1553988412896176,0.05703330561677692,null,0.1553988412896176,-0.050828039068373396,null,0.1553988412896176,0.002455406336435857,null,0.1553988412896176,0.12816576933029103,null,0.1553988412896176,0.09423993789426603,null,0.1553988412896176,0.018380342862312632,null,0.1553988412896176,-0.1403535076089,null,0.1553988412896176,0.06871192788841603,null,0.1553988412896176,-0.023952332668672964,null,0.1553988412896176,0.6038093389309235,null,0.1553988412896176,-0.22464023841064581,null,0.1553988412896176,0.6235258820011441,null,0.1553988412896176,0.3029539735812156,null,0.1553988412896176,0.04159092720090632,null,0.1553988412896176,-0.03680665439797601,null,0.11475423622127827,-0.1690975117806332,null,0.11475423622127827,0.28584750360020167,null,0.11475423622127827,0.44809826233772243,null,0.11475423622127827,-0.391033593733103,null,0.11475423622127827,0.10114953458154916,null,0.11475423622127827,0.1522386078728198,null,0.11475423622127827,0.028607302384825114,null,0.11475423622127827,0.2384491685558417,null,0.11475423622127827,0.13640959375076997,null,0.11475423622127827,0.06331190611440535,null,0.11475423622127827,-0.009962916874576842,null,0.11475423622127827,0.18710599211209006,null,0.11475423622127827,0.08943504044339054,null,0.11475423622127827,0.0990409072038064,null,0.11475423622127827,0.09546776922438927,null,0.11475423622127827,0.18702689685163446,null,0.11475423622127827,0.1553988412896176,null,0.11475423622127827,0.11475423622127827,null,0.11475423622127827,0.16740434415095717,null,0.11475423622127827,0.09303599327940484,null,0.11475423622127827,0.08246961931843445,null,0.11475423622127827,-0.5362921051027204,null,0.11475423622127827,-0.1466512420273052,null,0.11475423622127827,-0.03473556596775076,null,0.11475423622127827,0.20237710916350318,null,0.11475423622127827,0.06319647783221378,null,0.11475423622127827,0.0815418005670714,null,0.11475423622127827,0.18626857936721591,null,0.11475423622127827,0.05703330561677692,null,0.11475423622127827,-0.050828039068373396,null,0.11475423622127827,0.002455406336435857,null,0.11475423622127827,0.12816576933029103,null,0.11475423622127827,0.018380342862312632,null,0.11475423622127827,-0.1403535076089,null,0.11475423622127827,0.06871192788841603,null,0.11475423622127827,-0.023952332668672964,null,0.11475423622127827,0.6038093389309235,null,0.11475423622127827,-0.22464023841064581,null,0.11475423622127827,0.3029539735812156,null,0.11475423622127827,0.04159092720090632,null,0.11475423622127827,-0.014793958827444862,null,0.11475423622127827,0.027213243108594184,null,0.11475423622127827,-0.09432934860948526,null,0.11475423622127827,-0.03680665439797601,null,0.16740434415095717,0.1522386078728198,null,0.16740434415095717,0.028607302384825114,null,0.16740434415095717,0.009541222751769338,null,0.16740434415095717,0.2384491685558417,null,0.16740434415095717,0.13640959375076997,null,0.16740434415095717,0.06331190611440535,null,0.16740434415095717,0.060469593270392426,null,0.16740434415095717,0.005732050150491163,null,0.16740434415095717,-0.2290384506135222,null,0.16740434415095717,0.18710599211209006,null,0.16740434415095717,-0.05023824362946272,null,0.16740434415095717,0.08943504044339054,null,0.16740434415095717,0.0990409072038064,null,0.16740434415095717,0.6162309373296061,null,0.16740434415095717,0.09546776922438927,null,0.16740434415095717,0.18702689685163446,null,0.16740434415095717,0.1553988412896176,null,0.16740434415095717,0.11475423622127827,null,0.16740434415095717,0.16740434415095717,null,0.16740434415095717,0.09303599327940484,null,0.16740434415095717,0.08246961931843445,null,0.16740434415095717,-0.5362921051027204,null,0.16740434415095717,-0.1466512420273052,null,0.16740434415095717,-0.03473556596775076,null,0.16740434415095717,0.20237710916350318,null,0.16740434415095717,0.06319647783221378,null,0.16740434415095717,0.0815418005670714,null,0.16740434415095717,0.18626857936721591,null,0.16740434415095717,0.05703330561677692,null,0.16740434415095717,-0.050828039068373396,null,0.16740434415095717,0.002455406336435857,null,0.16740434415095717,0.12816576933029103,null,0.16740434415095717,0.042607347436113545,null,0.16740434415095717,0.09423993789426603,null,0.16740434415095717,0.018380342862312632,null,0.16740434415095717,-0.1403535076089,null,0.16740434415095717,0.06871192788841603,null,0.16740434415095717,-0.023952332668672964,null,0.16740434415095717,0.6038093389309235,null,0.16740434415095717,-0.22464023841064581,null,0.16740434415095717,0.6235258820011441,null,0.16740434415095717,0.3029539735812156,null,0.16740434415095717,0.28867371863579067,null,0.16740434415095717,0.04159092720090632,null,0.16740434415095717,-0.03680665439797601,null,0.08246961931843445,-0.29463327425416364,null,0.08246961931843445,0.08194952097500778,null,0.08246961931843445,-0.1690975117806332,null,0.08246961931843445,0.28584750360020167,null,0.08246961931843445,0.33611693940702214,null,0.08246961931843445,0.26779525913472657,null,0.08246961931843445,-0.01979918442280888,null,0.08246961931843445,0.3062713594271183,null,0.08246961931843445,0.4479145146138027,null,0.08246961931843445,0.1702663068464682,null,0.08246961931843445,0.0966653028950195,null,0.08246961931843445,0.27787266245253656,null,0.08246961931843445,0.5994292787718007,null,0.08246961931843445,0.1619806257717881,null,0.08246961931843445,0.17229006718757392,null,0.08246961931843445,0.1522386078728198,null,0.08246961931843445,0.028607302384825114,null,0.08246961931843445,0.009541222751769338,null,0.08246961931843445,0.2384491685558417,null,0.08246961931843445,-0.6225283015838625,null,0.08246961931843445,0.054509865551800964,null,0.08246961931843445,0.13640959375076997,null,0.08246961931843445,0.06331190611440535,null,0.08246961931843445,0.29727836243286726,null,0.08246961931843445,-0.2290384506135222,null,0.08246961931843445,0.08943504044339054,null,0.08246961931843445,0.09546776922438927,null,0.08246961931843445,0.1553988412896176,null,0.08246961931843445,0.11475423622127827,null,0.08246961931843445,0.16740434415095717,null,0.08246961931843445,0.09303599327940484,null,0.08246961931843445,0.08246961931843445,null,0.08246961931843445,-0.5362921051027204,null,0.08246961931843445,-0.1466512420273052,null,0.08246961931843445,-0.03473556596775076,null,0.08246961931843445,0.20237710916350318,null,0.08246961931843445,0.06319647783221378,null,0.08246961931843445,0.0815418005670714,null,0.08246961931843445,0.05703330561677692,null,0.08246961931843445,0.002455406336435857,null,0.08246961931843445,0.12816576933029103,null,0.08246961931843445,0.042607347436113545,null,0.08246961931843445,0.018380342862312632,null,0.08246961931843445,-0.1403535076089,null,0.08246961931843445,0.06871192788841603,null,0.08246961931843445,-0.023952332668672964,null,0.08246961931843445,0.6038093389309235,null,0.08246961931843445,-0.22464023841064581,null,0.08246961931843445,0.3029539735812156,null,0.08246961931843445,0.04159092720090632,null,0.08246961931843445,-0.014793958827444862,null,0.08246961931843445,-0.017550494847514003,null,0.08246961931843445,-0.03680665439797601,null,0.08246961931843445,-0.1074320392108557,null,0.08246961931843445,0.04941418498127958,null,0.08246961931843445,0.026603559379496024,null,0.08246961931843445,-0.1401370266343255,null,0.08246961931843445,-0.2558440596545207,null,-0.5362921051027204,-0.252855324788197,null,-0.5362921051027204,-0.30155487211560916,null,-0.5362921051027204,-0.06077115634072489,null,-0.5362921051027204,-0.23932521457913866,null,-0.5362921051027204,-0.3627178006383887,null,-0.5362921051027204,-0.08544256476651446,null,-0.5362921051027204,-0.5362921051027204,null,-0.1466512420273052,-0.252855324788197,null,-0.1466512420273052,0.4479145146138027,null,-0.1466512420273052,0.17229006718757392,null,-0.1466512420273052,-0.5362921051027204,null,-0.1466512420273052,-0.1466512420273052,null,-0.1466512420273052,-0.03473556596775076,null,-0.1466512420273052,0.20237710916350318,null,-0.1466512420273052,0.06319647783221378,null,-0.1466512420273052,0.0815418005670714,null,0.06319647783221378,-0.1690975117806332,null,0.06319647783221378,0.28584750360020167,null,0.06319647783221378,0.33611693940702214,null,0.06319647783221378,0.395908758306365,null,0.06319647783221378,0.26779525913472657,null,0.06319647783221378,-0.01979918442280888,null,0.06319647783221378,0.3062713594271183,null,0.06319647783221378,-0.4480922465360008,null,0.06319647783221378,0.1522386078728198,null,0.06319647783221378,0.13640959375076997,null,0.06319647783221378,-0.009962916874576842,null,0.06319647783221378,0.29727836243286726,null,0.06319647783221378,0.060469593270392426,null,0.06319647783221378,-0.10562169416756789,null,0.06319647783221378,-0.2290384506135222,null,0.06319647783221378,0.1553988412896176,null,0.06319647783221378,0.11475423622127827,null,0.06319647783221378,0.16740434415095717,null,0.06319647783221378,0.09303599327940484,null,0.06319647783221378,0.08246961931843445,null,0.06319647783221378,-0.5362921051027204,null,0.06319647783221378,-0.1466512420273052,null,0.06319647783221378,-0.03473556596775076,null,0.06319647783221378,0.20237710916350318,null,0.06319647783221378,0.06319647783221378,null,0.06319647783221378,0.0815418005670714,null,0.06319647783221378,0.18626857936721591,null,0.06319647783221378,0.05703330561677692,null,0.06319647783221378,0.002455406336435857,null,0.06319647783221378,0.12816576933029103,null,0.06319647783221378,0.09423993789426603,null,0.06319647783221378,0.018380342862312632,null,0.06319647783221378,-0.1403535076089,null,0.06319647783221378,0.06871192788841603,null,0.06319647783221378,-0.023952332668672964,null,0.06319647783221378,0.6038093389309235,null,0.06319647783221378,-0.22464023841064581,null,0.06319647783221378,0.3029539735812156,null,0.06319647783221378,0.04159092720090632,null,0.06319647783221378,-0.014793958827444862,null,0.06319647783221378,-0.09432934860948526,null,0.06319647783221378,-0.08876986711147754,null,0.06319647783221378,-0.03680665439797601,null,0.06319647783221378,0.026603559379496024,null,0.3029539735812156,0.3062713594271183,null,0.3029539735812156,0.1522386078728198,null,0.3029539735812156,0.13640959375076997,null,0.3029539735812156,0.06331190611440535,null,0.3029539735812156,0.0990409072038064,null,0.3029539735812156,0.09546776922438927,null,0.3029539735812156,0.11475423622127827,null,0.3029539735812156,0.08246961931843445,null,0.3029539735812156,-0.03473556596775076,null,0.3029539735812156,0.20237710916350318,null,0.3029539735812156,0.06319647783221378,null,0.3029539735812156,0.002455406336435857,null,0.3029539735812156,0.12816576933029103,null,0.3029539735812156,0.09423993789426603,null,0.3029539735812156,0.06871192788841603,null,0.3029539735812156,0.3029539735812156,null,0.3029539735812156,0.04159092720090632,null,0.3029539735812156,-0.15459632707958687,null,0.28867371863579067,0.1522386078728198,null,0.28867371863579067,0.16740434415095717,null,0.28867371863579067,0.08246961931843445,null,0.28867371863579067,-0.03473556596775076,null,0.28867371863579067,0.20237710916350318,null,0.28867371863579067,0.06319647783221378,null,0.28867371863579067,0.12816576933029103,null,0.28867371863579067,0.09423993789426603,null,0.28867371863579067,0.3029539735812156,null,0.28867371863579067,0.28867371863579067,null,0.28867371863579067,0.04159092720090632,null,0.28867371863579067,-0.03680665439797601,null,-0.0015099583064107627,-0.252855324788197,null,-0.0015099583064107627,-0.30155487211560916,null,-0.0015099583064107627,-0.7438895986759475,null,-0.0015099583064107627,-0.5359273360070705,null,-0.0015099583064107627,-0.3638443706291776,null,-0.0015099583064107627,-0.21938550868633475,null,-0.0015099583064107627,0.004771233449698027,null,-0.0015099583064107627,0.6243375484352359,null,-0.0015099583064107627,-0.08544256476651446,null,-0.0015099583064107627,-0.37304752842516714,null,-0.0015099583064107627,-0.15063312761817263,null,-0.0015099583064107627,-0.15814644299407177,null,-0.0015099583064107627,0.09964779418926023,null,-0.0015099583064107627,0.08194952097500778,null,-0.0015099583064107627,-0.1690975117806332,null,-0.0015099583064107627,0.28584750360020167,null,-0.0015099583064107627,0.33611693940702214,null,-0.0015099583064107627,0.395908758306365,null,-0.0015099583064107627,0.10925060882471374,null,-0.0015099583064107627,-0.01979918442280888,null,-0.0015099583064107627,0.3062713594271183,null,-0.0015099583064107627,0.04250134267242095,null,-0.0015099583064107627,0.27787266245253656,null,-0.0015099583064107627,0.1619806257717881,null,-0.0015099583064107627,0.17229006718757392,null,-0.0015099583064107627,0.028607302384825114,null,-0.0015099583064107627,-0.6225283015838625,null,-0.0015099583064107627,0.054509865551800964,null,-0.0015099583064107627,0.13640959375076997,null,-0.0015099583064107627,0.06331190611440535,null,-0.0015099583064107627,-0.009962916874576842,null,-0.0015099583064107627,0.29727836243286726,null,-0.0015099583064107627,0.060469593270392426,null,-0.0015099583064107627,0.005732050150491163,null,-0.0015099583064107627,-0.10562169416756789,null,-0.0015099583064107627,-0.2290384506135222,null,-0.0015099583064107627,0.18710599211209006,null,-0.0015099583064107627,-0.05023824362946272,null,-0.0015099583064107627,0.08943504044339054,null,-0.0015099583064107627,0.0990409072038064,null,-0.0015099583064107627,0.6162309373296061,null,-0.0015099583064107627,0.40323468255758227,null,-0.0015099583064107627,0.09546776922438927,null,-0.0015099583064107627,0.18702689685163446,null,-0.0015099583064107627,0.1553988412896176,null,-0.0015099583064107627,0.11475423622127827,null,-0.0015099583064107627,0.16740434415095717,null,-0.0015099583064107627,0.09303599327940484,null,-0.0015099583064107627,0.08246961931843445,null,-0.0015099583064107627,-0.5362921051027204,null,-0.0015099583064107627,-0.1466512420273052,null,-0.0015099583064107627,-0.03473556596775076,null,-0.0015099583064107627,0.20237710916350318,null,-0.0015099583064107627,0.06319647783221378,null,-0.0015099583064107627,0.0815418005670714,null,-0.0015099583064107627,0.18626857936721591,null,-0.0015099583064107627,0.05703330561677692,null,-0.0015099583064107627,0.002455406336435857,null,-0.0015099583064107627,0.12816576933029103,null,-0.0015099583064107627,0.09423993789426603,null,-0.0015099583064107627,0.018380342862312632,null,-0.0015099583064107627,-0.1403535076089,null,-0.0015099583064107627,0.06871192788841603,null,-0.0015099583064107627,-0.023952332668672964,null,-0.0015099583064107627,0.6038093389309235,null,-0.0015099583064107627,-0.22464023841064581,null,-0.0015099583064107627,0.3029539735812156,null,-0.0015099583064107627,0.28867371863579067,null,-0.0015099583064107627,0.04159092720090632,null,-0.0015099583064107627,-0.014793958827444862,null,-0.0015099583064107627,0.027213243108594184,null,-0.0015099583064107627,-0.09432934860948526,null,-0.0015099583064107627,-0.0015099583064107627,null,-0.0015099583064107627,-0.017550494847514003,null,-0.0015099583064107627,-0.20176933670452085,null,-0.0015099583064107627,-0.08876986711147754,null,-0.0015099583064107627,-0.03680665439797601,null,-0.0015099583064107627,0.038054130471637145,null,-0.0015099583064107627,-0.015070755974836,null,-0.0015099583064107627,-0.15459632707958687,null,-0.0015099583064107627,-0.23178600151815423,null,-0.0015099583064107627,0.04837308531946771,null,-0.0015099583064107627,-0.1401370266343255,null,-0.0015099583064107627,-0.1728408574228859,null,-0.1690975117806332,-0.009962916874576842,null,-0.1690975117806332,0.29727836243286726,null,-0.1690975117806332,0.060469593270392426,null,-0.1690975117806332,0.005732050150491163,null,-0.1690975117806332,-0.10562169416756789,null,-0.1690975117806332,0.18710599211209006,null,-0.1690975117806332,0.08943504044339054,null,-0.1690975117806332,0.0990409072038064,null,-0.1690975117806332,0.04159092720090632,null,-0.1690975117806332,-0.03680665439797601,null,0.28584750360020167,-0.009962916874576842,null,0.28584750360020167,0.29727836243286726,null,0.28584750360020167,0.060469593270392426,null,0.28584750360020167,0.005732050150491163,null,0.28584750360020167,-0.10562169416756789,null,0.28584750360020167,-0.2290384506135222,null,0.28584750360020167,0.18710599211209006,null,0.28584750360020167,0.08943504044339054,null,0.28584750360020167,0.0990409072038064,null,0.33611693940702214,0.09546776922438927,null,0.33611693940702214,0.18702689685163446,null,0.33611693940702214,0.1553988412896176,null,0.33611693940702214,0.11475423622127827,null,0.33611693940702214,0.16740434415095717,null,0.33611693940702214,0.08246961931843445,null,0.33611693940702214,-0.03473556596775076,null,0.33611693940702214,0.20237710916350318,null,0.33611693940702214,0.06319647783221378,null,0.33611693940702214,0.3029539735812156,null,0.33611693940702214,-0.03680665439797601,null,-0.03473556596775076,0.33611693940702214,null,-0.03473556596775076,0.26779525913472657,null,-0.03473556596775076,0.3062713594271183,null,-0.03473556596775076,0.1522386078728198,null,-0.03473556596775076,0.2384491685558417,null,-0.03473556596775076,-0.009962916874576842,null,-0.03473556596775076,0.29727836243286726,null,-0.03473556596775076,0.060469593270392426,null,-0.03473556596775076,0.005732050150491163,null,-0.03473556596775076,-0.10562169416756789,null,-0.03473556596775076,-0.2290384506135222,null,-0.03473556596775076,0.18710599211209006,null,-0.03473556596775076,-0.05023824362946272,null,-0.03473556596775076,0.08943504044339054,null,-0.03473556596775076,0.0990409072038064,null,-0.03473556596775076,0.1553988412896176,null,-0.03473556596775076,0.11475423622127827,null,-0.03473556596775076,-0.5362921051027204,null,-0.03473556596775076,-0.03473556596775076,null,-0.03473556596775076,0.20237710916350318,null,0.395908758306365,0.18702689685163446,null,0.395908758306365,0.1553988412896176,null,0.395908758306365,0.11475423622127827,null,0.395908758306365,0.08246961931843445,null,0.395908758306365,-0.03473556596775076,null,0.395908758306365,0.20237710916350318,null,0.395908758306365,0.06319647783221378,null,0.395908758306365,0.3029539735812156,null,0.26779525913472657,0.1553988412896176,null,0.26779525913472657,0.11475423622127827,null,0.26779525913472657,0.16740434415095717,null,0.26779525913472657,0.08246961931843445,null,0.26779525913472657,0.20237710916350318,null,0.26779525913472657,0.06319647783221378,null,0.26779525913472657,0.05703330561677692,null,0.26779525913472657,0.12816576933029103,null,0.26779525913472657,0.6038093389309235,null,0.26779525913472657,0.28867371863579067,null,0.26779525913472657,0.04159092720090632,null,0.05703330561677692,0.09964779418926023,null,0.05703330561677692,0.44809826233772243,null,0.05703330561677692,0.009904033766234614,null,0.05703330561677692,-0.05702463513022102,null,0.05703330561677692,-0.13675601778564356,null,0.05703330561677692,-0.25999885017398866,null,0.05703330561677692,-0.5362921051027204,null,0.05703330561677692,0.20237710916350318,null,0.05703330561677692,0.0815418005670714,null,0.05703330561677692,0.05703330561677692,null,0.05703330561677692,0.002455406336435857,null,0.05703330561677692,0.12816576933029103,null,0.05703330561677692,0.042607347436113545,null,0.05703330561677692,0.09423993789426603,null,0.05703330561677692,-0.023952332668672964,null,0.05703330561677692,0.026603559379496024,null,0.6038093389309235,0.6038093389309235,null,0.002455406336435857,0.3062713594271183,null,0.002455406336435857,0.009904033766234614,null,0.002455406336435857,-0.05702463513022102,null,0.002455406336435857,-0.13675601778564356,null,0.002455406336435857,-0.25999885017398866,null,0.002455406336435857,0.29727836243286726,null,0.002455406336435857,-0.1466512420273052,null,0.002455406336435857,0.20237710916350318,null,0.002455406336435857,0.06319647783221378,null,0.002455406336435857,0.0815418005670714,null,0.002455406336435857,0.05703330561677692,null,0.002455406336435857,0.002455406336435857,null,0.002455406336435857,0.12816576933029103,null,0.002455406336435857,0.09423993789426603,null,0.002455406336435857,0.06871192788841603,null,0.002455406336435857,-0.0015099583064107627,null,0.002455406336435857,-0.012200878791194537,null,0.002455406336435857,-0.08876986711147754,null,0.002455406336435857,0.1070862501102821,null,0.002455406336435857,-0.1401370266343255,null,0.3062713594271183,-0.29463327425416364,null,0.3062713594271183,0.6162309373296061,null,0.3062713594271183,0.40323468255758227,null,0.3062713594271183,0.09546776922438927,null,0.44809826233772243,-0.1690975117806332,null,0.44809826233772243,0.28584750360020167,null,0.44809826233772243,0.6162309373296061,null,0.44809826233772243,0.40323468255758227,null,0.44809826233772243,0.09546776922438927,null,0.44809826233772243,0.28867371863579067,null,0.44809826233772243,-0.014793958827444862,null,0.04941418498127958,0.09964779418926023,null,0.04941418498127958,0.08194952097500778,null,0.04941418498127958,0.26779525913472657,null,0.04941418498127958,-0.01979918442280888,null,0.04941418498127958,-0.023952332668672964,null,0.04941418498127958,0.6038093389309235,null,0.04941418498127958,0.6235258820011441,null,0.04941418498127958,-0.014793958827444862,null,0.04941418498127958,0.027213243108594184,null,0.04941418498127958,-0.09432934860948526,null,0.04941418498127958,0.05591947480762767,null,0.04941418498127958,-0.012200878791194537,null,0.04941418498127958,-0.03680665439797601,null,0.04941418498127958,-0.015070755974836,null,0.04941418498127958,-0.15459632707958687,null,0.04941418498127958,-0.1074320392108557,null,0.04941418498127958,-0.34076102287964954,null,0.04941418498127958,0.04941418498127958,null,0.04941418498127958,-0.23178600151815423,null,0.04941418498127958,0.04837308531946771,null,0.04941418498127958,0.1070862501102821,null,0.04941418498127958,0.026603559379496024,null,0.04941418498127958,-0.1401370266343255,null,0.04941418498127958,-0.2558440596545207,null,0.18626857936721591,0.0815418005670714,null,0.18626857936721591,0.18626857936721591,null,0.18626857936721591,0.05703330561677692,null,0.18626857936721591,0.002455406336435857,null,0.18626857936721591,0.12816576933029103,null,0.18626857936721591,0.09423993789426603,null,0.18626857936721591,0.3029539735812156,null,0.18626857936721591,-0.014793958827444862,null,0.18626857936721591,-0.08876986711147754,null,-0.20176933670452085,0.44809826233772243,null,-0.20176933670452085,-0.391033593733103,null,-0.20176933670452085,0.10114953458154916,null,-0.20176933670452085,0.009904033766234614,null,-0.20176933670452085,-0.05702463513022102,null,-0.20176933670452085,-0.4156896382749921,null,-0.20176933670452085,-0.13675601778564356,null,-0.20176933670452085,-0.25999885017398866,null,-0.20176933670452085,-0.5608169936589029,null,-0.20176933670452085,-0.22464023841064581,null,-0.20176933670452085,-0.014793958827444862,null,-0.20176933670452085,-0.03680665439797601,null,-0.20176933670452085,0.026603559379496024,null,-0.20176933670452085,-0.1728408574228859,null,0.6235258820011441,0.6235258820011441,null,0.6235258820011441,0.026603559379496024,null,0.05591947480762767,-0.252855324788197,null,0.05591947480762767,-0.30155487211560916,null,0.05591947480762767,-0.3638443706291776,null,0.05591947480762767,0.004771233449698027,null,0.05591947480762767,-0.1690975117806332,null,0.05591947480762767,0.28584750360020167,null,0.05591947480762767,0.10925060882471374,null,0.05591947480762767,-0.01979918442280888,null,0.05591947480762767,0.028607302384825114,null,0.05591947480762767,-0.009962916874576842,null,0.05591947480762767,0.29727836243286726,null,0.05591947480762767,-0.10562169416756789,null,0.05591947480762767,0.0990409072038064,null,0.05591947480762767,0.6162309373296061,null,0.05591947480762767,0.09546776922438927,null,0.05591947480762767,0.16740434415095717,null,0.05591947480762767,0.3029539735812156,null,0.05591947480762767,0.28867371863579067,null,0.05591947480762767,0.04159092720090632,null,0.05591947480762767,-0.014793958827444862,null,0.05591947480762767,0.027213243108594184,null,0.05591947480762767,-0.09432934860948526,null,0.05591947480762767,-0.028474856328068943,null,0.05591947480762767,0.038054130471637145,null,0.05591947480762767,-0.1728408574228859,null,-0.012200878791194537,-0.15814644299407177,null,-0.012200878791194537,-0.1690975117806332,null,-0.012200878791194537,0.28584750360020167,null,-0.012200878791194537,0.395908758306365,null,-0.012200878791194537,0.10925060882471374,null,-0.012200878791194537,-0.01979918442280888,null,-0.012200878791194537,0.44809826233772243,null,-0.012200878791194537,-0.391033593733103,null,-0.012200878791194537,0.10114953458154916,null,-0.012200878791194537,0.009904033766234614,null,-0.012200878791194537,-0.05702463513022102,null,-0.012200878791194537,-0.4156896382749921,null,-0.012200878791194537,-0.13675601778564356,null,-0.012200878791194537,-0.25999885017398866,null,-0.012200878791194537,-0.5608169936589029,null,-0.012200878791194537,0.17229006718757392,null,-0.012200878791194537,0.2384491685558417,null,-0.012200878791194537,-0.6225283015838625,null,-0.012200878791194537,0.054509865551800964,null,-0.012200878791194537,0.13640959375076997,null,-0.012200878791194537,0.06331190611440535,null,-0.012200878791194537,-0.009962916874576842,null,-0.012200878791194537,0.29727836243286726,null,-0.012200878791194537,0.060469593270392426,null,-0.012200878791194537,0.005732050150491163,null,-0.012200878791194537,-0.10562169416756789,null,-0.012200878791194537,-0.2290384506135222,null,-0.012200878791194537,0.18710599211209006,null,-0.012200878791194537,-0.05023824362946272,null,-0.012200878791194537,0.0990409072038064,null,-0.012200878791194537,0.6162309373296061,null,-0.012200878791194537,0.09546776922438927,null,-0.012200878791194537,0.18702689685163446,null,-0.012200878791194537,0.1553988412896176,null,-0.012200878791194537,0.11475423622127827,null,-0.012200878791194537,0.16740434415095717,null,-0.012200878791194537,0.09303599327940484,null,-0.012200878791194537,0.08246961931843445,null,-0.012200878791194537,-0.5362921051027204,null,-0.012200878791194537,-0.1466512420273052,null,-0.012200878791194537,-0.03473556596775076,null,-0.012200878791194537,0.20237710916350318,null,-0.012200878791194537,0.06319647783221378,null,-0.012200878791194537,0.0815418005670714,null,-0.012200878791194537,0.18626857936721591,null,-0.012200878791194537,0.05703330561677692,null,-0.012200878791194537,0.002455406336435857,null,-0.012200878791194537,0.12816576933029103,null,-0.012200878791194537,0.09423993789426603,null,-0.012200878791194537,0.018380342862312632,null,-0.012200878791194537,-0.1403535076089,null,-0.012200878791194537,0.06871192788841603,null,-0.012200878791194537,-0.023952332668672964,null,-0.012200878791194537,0.6038093389309235,null,-0.012200878791194537,-0.22464023841064581,null,-0.012200878791194537,0.3029539735812156,null,-0.012200878791194537,0.28867371863579067,null,-0.012200878791194537,0.04159092720090632,null,-0.012200878791194537,-0.08876986711147754,null,-0.012200878791194537,-0.015070755974836,null,-0.012200878791194537,-0.15459632707958687,null,-0.012200878791194537,-0.1074320392108557,null,-0.012200878791194537,0.04941418498127958,null,-0.012200878791194537,-0.23178600151815423,null,-0.012200878791194537,0.04837308531946771,null,-0.012200878791194537,-0.1728408574228859,null,-0.017550494847514003,-0.252855324788197,null,-0.017550494847514003,-0.30155487211560916,null,-0.017550494847514003,-0.7438895986759475,null,-0.017550494847514003,-0.5359273360070705,null,-0.017550494847514003,-0.3638443706291776,null,-0.017550494847514003,-0.10856284828320309,null,-0.017550494847514003,0.004771233449698027,null,-0.017550494847514003,0.39799096662722105,null,-0.017550494847514003,0.16764997014744862,null,-0.017550494847514003,-0.6018103248944167,null,-0.017550494847514003,-0.06077115634072489,null,-0.017550494847514003,0.6243375484352359,null,-0.017550494847514003,-0.08544256476651446,null,-0.017550494847514003,-0.2866206398705779,null,-0.017550494847514003,-0.37304752842516714,null,-0.017550494847514003,-0.15063312761817263,null,-0.017550494847514003,-0.15814644299407177,null,-0.017550494847514003,-0.29463327425416364,null,-0.017550494847514003,0.08194952097500778,null,-0.017550494847514003,-0.1690975117806332,null,-0.017550494847514003,0.28584750360020167,null,-0.017550494847514003,0.395908758306365,null,-0.017550494847514003,0.10925060882471374,null,-0.017550494847514003,0.26779525913472657,null,-0.017550494847514003,-0.01979918442280888,null,-0.017550494847514003,0.44809826233772243,null,-0.017550494847514003,0.009904033766234614,null,-0.017550494847514003,-0.4156896382749921,null,-0.017550494847514003,-0.5608169936589029,null,-0.017550494847514003,0.2996301701333789,null,-0.017550494847514003,0.30578357189033234,null,-0.017550494847514003,0.4479145146138027,null,-0.017550494847514003,0.0966653028950195,null,-0.017550494847514003,0.27787266245253656,null,-0.017550494847514003,0.5994292787718007,null,-0.017550494847514003,0.1619806257717881,null,-0.017550494847514003,0.17229006718757392,null,-0.017550494847514003,0.028607302384825114,null,-0.017550494847514003,0.2384491685558417,null,-0.017550494847514003,-0.6225283015838625,null,-0.017550494847514003,0.054509865551800964,null,-0.017550494847514003,0.13640959375076997,null,-0.017550494847514003,0.06331190611440535,null,-0.017550494847514003,-0.009962916874576842,null,-0.017550494847514003,0.29727836243286726,null,-0.017550494847514003,0.060469593270392426,null,-0.017550494847514003,-0.10562169416756789,null,-0.017550494847514003,-0.2290384506135222,null,-0.017550494847514003,0.18710599211209006,null,-0.017550494847514003,-0.05023824362946272,null,-0.017550494847514003,0.0990409072038064,null,-0.017550494847514003,0.6162309373296061,null,-0.017550494847514003,0.09546776922438927,null,-0.017550494847514003,0.1553988412896176,null,-0.017550494847514003,0.11475423622127827,null,-0.017550494847514003,0.16740434415095717,null,-0.017550494847514003,0.09303599327940484,null,-0.017550494847514003,0.08246961931843445,null,-0.017550494847514003,-0.5362921051027204,null,-0.017550494847514003,-0.1466512420273052,null,-0.017550494847514003,-0.03473556596775076,null,-0.017550494847514003,0.20237710916350318,null,-0.017550494847514003,0.06319647783221378,null,-0.017550494847514003,0.0815418005670714,null,-0.017550494847514003,0.18626857936721591,null,-0.017550494847514003,0.002455406336435857,null,-0.017550494847514003,0.12816576933029103,null,-0.017550494847514003,0.042607347436113545,null,-0.017550494847514003,0.09423993789426603,null,-0.017550494847514003,-0.1403535076089,null,-0.017550494847514003,0.06871192788841603,null,-0.017550494847514003,-0.023952332668672964,null,-0.017550494847514003,0.6038093389309235,null,-0.017550494847514003,-0.22464023841064581,null,-0.017550494847514003,0.3029539735812156,null,-0.017550494847514003,0.28867371863579067,null,-0.017550494847514003,0.04159092720090632,null,-0.017550494847514003,-0.014793958827444862,null,-0.017550494847514003,0.027213243108594184,null,-0.017550494847514003,-0.09432934860948526,null,-0.017550494847514003,-0.017550494847514003,null,-0.017550494847514003,-0.20176933670452085,null,-0.017550494847514003,-0.03680665439797601,null,-0.017550494847514003,0.038054130471637145,null,-0.017550494847514003,-0.34076102287964954,null,0.1070862501102821,-0.1690975117806332,null,0.1070862501102821,0.28584750360020167,null,0.1070862501102821,-0.023952332668672964,null,0.1070862501102821,0.6038093389309235,null,0.1070862501102821,-0.22464023841064581,null,0.1070862501102821,-0.014793958827444862,null,0.1070862501102821,-0.0015099583064107627,null,0.1070862501102821,-0.028474856328068943,null,0.1070862501102821,0.05591947480762767,null,0.1070862501102821,-0.20176933670452085,null,0.1070862501102821,-0.08876986711147754,null,0.1070862501102821,-0.03680665439797601,null,0.1070862501102821,0.04941418498127958,null,0.1070862501102821,0.1070862501102821,null,0.1070862501102821,0.026603559379496024,null,0.026603559379496024,-0.1690975117806332,null,0.026603559379496024,0.26779525913472657,null,0.026603559379496024,0.1702663068464682,null,0.026603559379496024,0.13640959375076997,null,0.026603559379496024,0.06331190611440535,null,0.026603559379496024,0.11475423622127827,null,0.026603559379496024,0.042607347436113545,null,0.026603559379496024,0.6038093389309235,null,0.026603559379496024,-0.22464023841064581,null,0.026603559379496024,0.05591947480762767,null,0.026603559379496024,-0.012200878791194537,null,0.026603559379496024,-0.23178600151815423,null,0.026603559379496024,0.1070862501102821,null,0.026603559379496024,0.026603559379496024,null,0.026603559379496024,-0.2558440596545207,null,-0.1401370266343255,0.08194952097500778,null,-0.1401370266343255,0.10925060882471374,null,-0.1401370266343255,-0.012200878791194537,null,0.042607347436113545,0.009904033766234614,null,0.042607347436113545,-0.05702463513022102,null,0.042607347436113545,-0.4156896382749921,null,0.042607347436113545,-0.13675601778564356,null,0.042607347436113545,-0.25999885017398866,null,0.042607347436113545,0.054509865551800964,null,0.042607347436113545,0.18710599211209006,null,0.042607347436113545,-0.05023824362946272,null,0.042607347436113545,0.0990409072038064,null,0.042607347436113545,0.20237710916350318,null,0.042607347436113545,0.06319647783221378,null,0.042607347436113545,0.002455406336435857,null,0.042607347436113545,0.042607347436113545,null,0.042607347436113545,0.3029539735812156,null,0.042607347436113545,0.04159092720090632,null,0.042607347436113545,-0.0015099583064107627,null,0.018380342862312632,0.0990409072038064,null,0.018380342862312632,0.018380342862312632,null,0.018380342862312632,0.3029539735812156,null,0.018380342862312632,0.04159092720090632,null,0.018380342862312632,0.05591947480762767,null,0.018380342862312632,0.04941418498127958,null,0.018380342862312632,0.04837308531946771,null,0.018380342862312632,0.1070862501102821,null,0.018380342862312632,-0.1401370266343255,null,0.018380342862312632,-0.2558440596545207,null,-0.1403535076089,0.44809826233772243,null,-0.1403535076089,-0.391033593733103,null,-0.1403535076089,0.10114953458154916,null,-0.1403535076089,0.009904033766234614,null,-0.1403535076089,-0.05702463513022102,null,-0.1403535076089,-0.4156896382749921,null,-0.1403535076089,-0.13675601778564356,null,-0.1403535076089,-0.25999885017398866,null,-0.1403535076089,-0.5608169936589029,null,-0.1403535076089,0.028607302384825114,null,-0.1403535076089,0.009541222751769338,null,-0.1403535076089,0.13640959375076997,null,-0.1403535076089,-0.009962916874576842,null,-0.1403535076089,0.29727836243286726,null,-0.1403535076089,-0.2290384506135222,null,-0.1403535076089,0.0990409072038064,null,-0.1403535076089,0.09546776922438927,null,-0.1403535076089,-0.5362921051027204,null,-0.1403535076089,-0.03473556596775076,null,-0.1403535076089,0.20237710916350318,null,-0.1403535076089,-0.1403535076089,null,-0.1403535076089,0.06871192788841603,null,-0.1403535076089,-0.0015099583064107627,null,0.06871192788841603,0.09964779418926023,null,0.06871192788841603,0.08194952097500778,null,0.06871192788841603,-0.1690975117806332,null,0.06871192788841603,0.33611693940702214,null,0.06871192788841603,0.395908758306365,null,0.06871192788841603,0.10925060882471374,null,0.06871192788841603,-0.01979918442280888,null,0.06871192788841603,0.3062713594271183,null,0.06871192788841603,0.27787266245253656,null,0.06871192788841603,0.5994292787718007,null,0.06871192788841603,0.1619806257717881,null,0.06871192788841603,0.17229006718757392,null,0.06871192788841603,0.009541222751769338,null,0.06871192788841603,0.2384491685558417,null,0.06871192788841603,0.13640959375076997,null,0.06871192788841603,0.29727836243286726,null,0.06871192788841603,-0.2290384506135222,null,0.06871192788841603,0.18710599211209006,null,0.06871192788841603,-0.05023824362946272,null,0.06871192788841603,0.08943504044339054,null,0.06871192788841603,0.0990409072038064,null,0.06871192788841603,0.16740434415095717,null,0.06871192788841603,0.09303599327940484,null,0.06871192788841603,-0.5362921051027204,null,0.06871192788841603,0.20237710916350318,null,0.06871192788841603,0.06319647783221378,null,0.06871192788841603,0.0815418005670714,null,0.06871192788841603,0.05703330561677692,null,0.06871192788841603,0.002455406336435857,null,0.06871192788841603,0.12816576933029103,null,0.06871192788841603,-0.1403535076089,null,0.06871192788841603,0.06871192788841603,null,0.06871192788841603,-0.023952332668672964,null,0.06871192788841603,-0.22464023841064581,null,0.06871192788841603,0.04159092720090632,null,0.06871192788841603,-0.028474856328068943,null,0.06871192788841603,0.05591947480762767,null,0.06871192788841603,-0.017550494847514003,null,0.06871192788841603,-0.03680665439797601,null,0.06871192788841603,-0.1074320392108557,null,0.06871192788841603,-0.34076102287964954,null,0.06871192788841603,0.04941418498127958,null,0.06871192788841603,0.026603559379496024,null,-0.023952332668672964,0.44809826233772243,null,-0.023952332668672964,-0.391033593733103,null,-0.023952332668672964,0.10114953458154916,null,-0.023952332668672964,0.009904033766234614,null,-0.023952332668672964,-0.05702463513022102,null,-0.023952332668672964,-0.4156896382749921,null,-0.023952332668672964,-0.13675601778564356,null,-0.023952332668672964,-0.25999885017398866,null,-0.023952332668672964,-0.5608169936589029,null,-0.023952332668672964,0.13640959375076997,null,-0.023952332668672964,0.18710599211209006,null,-0.023952332668672964,0.16740434415095717,null,-0.023952332668672964,0.09303599327940484,null,-0.023952332668672964,0.20237710916350318,null,-0.023952332668672964,0.06319647783221378,null,-0.023952332668672964,0.06871192788841603,null,-0.023952332668672964,-0.023952332668672964,null,-0.023952332668672964,0.6038093389309235,null,-0.023952332668672964,-0.22464023841064581,null,-0.023952332668672964,-0.015070755974836,null,-0.023952332668672964,0.026603559379496024,null,-0.023952332668672964,-0.1728408574228859,null,0.0815418005670714,-0.4156896382749921,null,0.0815418005670714,-0.1466512420273052,null,0.0815418005670714,-0.03473556596775076,null,0.0815418005670714,0.20237710916350318,null,0.0815418005670714,0.06319647783221378,null,0.0815418005670714,0.0815418005670714,null,0.0815418005670714,0.18626857936721591,null,0.0815418005670714,0.05703330561677692,null,0.0815418005670714,0.002455406336435857,null,0.0815418005670714,0.12816576933029103,null,0.0815418005670714,0.09423993789426603,null,0.0815418005670714,0.06871192788841603,null,0.0815418005670714,0.3029539735812156,null,0.0815418005670714,0.04159092720090632,null,0.09423993789426603,0.30578357189033234,null,0.09423993789426603,0.27787266245253656,null,0.09423993789426603,0.1619806257717881,null,0.09423993789426603,0.17229006718757392,null,0.09423993789426603,0.1522386078728198,null,0.09423993789426603,0.028607302384825114,null,0.09423993789426603,0.009541222751769338,null,0.09423993789426603,0.2384491685558417,null,0.09423993789426603,0.054509865551800964,null,0.09423993789426603,0.13640959375076997,null,0.09423993789426603,0.06331190611440535,null,0.09423993789426603,0.29727836243286726,null,0.09423993789426603,0.18710599211209006,null,0.09423993789426603,-0.05023824362946272,null,0.09423993789426603,0.0990409072038064,null,0.09423993789426603,-0.48490439271789004,null,0.09423993789426603,0.6162309373296061,null,0.09423993789426603,0.09546776922438927,null,0.09423993789426603,0.1553988412896176,null,0.09423993789426603,0.11475423622127827,null,0.09423993789426603,0.16740434415095717,null,0.09423993789426603,0.09303599327940484,null,0.09423993789426603,0.08246961931843445,null,0.09423993789426603,-0.5362921051027204,null,0.09423993789426603,0.20237710916350318,null,0.09423993789426603,0.06319647783221378,null,0.09423993789426603,0.0815418005670714,null,0.09423993789426603,0.18626857936721591,null,0.09423993789426603,0.05703330561677692,null,0.09423993789426603,0.002455406336435857,null,0.09423993789426603,0.12816576933029103,null,0.09423993789426603,0.042607347436113545,null,0.09423993789426603,0.09423993789426603,null,0.09423993789426603,0.018380342862312632,null,0.09423993789426603,-0.1403535076089,null,0.09423993789426603,0.06871192788841603,null,0.09423993789426603,0.3029539735812156,null,0.09423993789426603,0.04159092720090632,null,0.09423993789426603,-0.08876986711147754,null,0.09423993789426603,0.04941418498127958,null,0.09423993789426603,0.026603559379496024,null,0.09423993789426603,-0.1401370266343255,null,0.09423993789426603,-0.1728408574228859,null,-0.08876986711147754,0.09964779418926023,null,-0.08876986711147754,0.26779525913472657,null,-0.08876986711147754,0.44809826233772243,null,-0.08876986711147754,-0.391033593733103,null,-0.08876986711147754,0.10114953458154916,null,-0.08876986711147754,0.009904033766234614,null,-0.08876986711147754,-0.05702463513022102,null,-0.08876986711147754,-0.4156896382749921,null,-0.08876986711147754,-0.13675601778564356,null,-0.08876986711147754,-0.25999885017398866,null,-0.08876986711147754,-0.5608169936589029,null,-0.08876986711147754,0.1619806257717881,null,-0.08876986711147754,0.13640959375076997,null,-0.08876986711147754,-0.009962916874576842,null,-0.08876986711147754,0.29727836243286726,null,-0.08876986711147754,-0.2290384506135222,null,-0.08876986711147754,-0.05023824362946272,null,-0.08876986711147754,0.6162309373296061,null,-0.08876986711147754,0.40323468255758227,null,-0.08876986711147754,0.002455406336435857,null,-0.08876986711147754,0.06871192788841603,null,-0.08876986711147754,-0.023952332668672964,null,-0.08876986711147754,-0.22464023841064581,null,-0.08876986711147754,-0.014793958827444862,null,-0.08876986711147754,0.027213243108594184,null,-0.08876986711147754,-0.09432934860948526,null,-0.08876986711147754,-0.0015099583064107627,null,-0.08876986711147754,-0.028474856328068943,null,-0.08876986711147754,0.05591947480762767,null,-0.08876986711147754,-0.012200878791194537,null,-0.08876986711147754,-0.017550494847514003,null,-0.08876986711147754,-0.20176933670452085,null,-0.08876986711147754,-0.08876986711147754,null,-0.08876986711147754,-0.03680665439797601,null,-0.08876986711147754,-0.015070755974836,null,-0.08876986711147754,-0.15459632707958687,null,-0.08876986711147754,-0.1074320392108557,null,-0.08876986711147754,-0.34076102287964954,null,-0.08876986711147754,0.04941418498127958,null,-0.08876986711147754,-0.23178600151815423,null,-0.08876986711147754,0.04837308531946771,null,-0.08876986711147754,0.1070862501102821,null,-0.08876986711147754,0.026603559379496024,null,-0.08876986711147754,-0.1401370266343255,null,-0.08876986711147754,-0.2558440596545207,null,-0.015070755974836,-0.252855324788197,null,-0.015070755974836,-0.30155487211560916,null,-0.015070755974836,-0.7438895986759475,null,-0.015070755974836,-0.6087974890262643,null,-0.015070755974836,-0.5359273360070705,null,-0.015070755974836,-0.1864691045251891,null,-0.015070755974836,-0.3638443706291776,null,-0.015070755974836,-0.21938550868633475,null,-0.015070755974836,0.23377042905798479,null,-0.015070755974836,-0.10856284828320309,null,-0.015070755974836,0.004771233449698027,null,-0.015070755974836,-0.18386033908940683,null,-0.015070755974836,0.39799096662722105,null,-0.015070755974836,0.16764997014744862,null,-0.015070755974836,-0.6018103248944167,null,-0.015070755974836,-0.06077115634072489,null,-0.015070755974836,0.6243375484352359,null,-0.015070755974836,-0.23932521457913866,null,-0.015070755974836,-0.3627178006383887,null,-0.015070755974836,-0.08544256476651446,null,-0.015070755974836,-0.15063312761817263,null,-0.015070755974836,0.09964779418926023,null,-0.015070755974836,0.08194952097500778,null,-0.015070755974836,-0.1690975117806332,null,-0.015070755974836,0.28584750360020167,null,-0.015070755974836,0.33611693940702214,null,-0.015070755974836,0.395908758306365,null,-0.015070755974836,0.10925060882471374,null,-0.015070755974836,0.26779525913472657,null,-0.015070755974836,-0.01979918442280888,null,-0.015070755974836,0.3062713594271183,null,-0.015070755974836,-0.4480922465360008,null,-0.015070755974836,0.44809826233772243,null,-0.015070755974836,-0.391033593733103,null,-0.015070755974836,0.10114953458154916,null,-0.015070755974836,0.009904033766234614,null,-0.015070755974836,-0.05702463513022102,null,-0.015070755974836,-0.4156896382749921,null,-0.015070755974836,-0.13675601778564356,null,-0.015070755974836,-0.25999885017398866,null,-0.015070755974836,-0.5608169936589029,null,-0.015070755974836,0.04250134267242095,null,-0.015070755974836,0.2996301701333789,null,-0.015070755974836,0.30578357189033234,null,-0.015070755974836,0.4479145146138027,null,-0.015070755974836,0.1702663068464682,null,-0.015070755974836,0.0966653028950195,null,-0.015070755974836,0.27787266245253656,null,-0.015070755974836,0.5994292787718007,null,-0.015070755974836,0.1619806257717881,null,-0.015070755974836,0.17229006718757392,null,-0.015070755974836,0.1522386078728198,null,-0.015070755974836,0.028607302384825114,null,-0.015070755974836,0.009541222751769338,null,-0.015070755974836,0.2384491685558417,null,-0.015070755974836,-0.6225283015838625,null,-0.015070755974836,0.054509865551800964,null,-0.015070755974836,0.13640959375076997,null,-0.015070755974836,0.06331190611440535,null,-0.015070755974836,-0.009962916874576842,null,-0.015070755974836,0.29727836243286726,null,-0.015070755974836,0.060469593270392426,null,-0.015070755974836,0.005732050150491163,null,-0.015070755974836,-0.10562169416756789,null,-0.015070755974836,-0.2290384506135222,null,-0.015070755974836,0.18710599211209006,null,-0.015070755974836,-0.05023824362946272,null,-0.015070755974836,0.08943504044339054,null,-0.015070755974836,0.0990409072038064,null,-0.015070755974836,-0.48490439271789004,null,-0.015070755974836,0.6162309373296061,null,-0.015070755974836,0.40323468255758227,null,-0.015070755974836,0.09546776922438927,null,-0.015070755974836,0.18702689685163446,null,-0.015070755974836,0.1553988412896176,null,-0.015070755974836,0.11475423622127827,null,-0.015070755974836,0.16740434415095717,null,-0.015070755974836,0.09303599327940484,null,-0.015070755974836,0.08246961931843445,null,-0.015070755974836,-0.5362921051027204,null,-0.015070755974836,-0.1466512420273052,null,-0.015070755974836,-0.03473556596775076,null,-0.015070755974836,0.20237710916350318,null,-0.015070755974836,0.06319647783221378,null,-0.015070755974836,0.0815418005670714,null,-0.015070755974836,0.18626857936721591,null,-0.015070755974836,0.05703330561677692,null,-0.015070755974836,-0.050828039068373396,null,-0.015070755974836,0.002455406336435857,null,-0.015070755974836,0.12816576933029103,null,-0.015070755974836,0.042607347436113545,null,-0.015070755974836,0.09423993789426603,null,-0.015070755974836,0.018380342862312632,null,-0.015070755974836,-0.1403535076089,null,-0.015070755974836,0.06871192788841603,null,-0.015070755974836,-0.023952332668672964,null,-0.015070755974836,0.6038093389309235,null,-0.015070755974836,-0.22464023841064581,null,-0.015070755974836,0.6235258820011441,null,-0.015070755974836,0.3029539735812156,null,-0.015070755974836,0.28867371863579067,null,-0.015070755974836,0.04159092720090632,null,-0.015070755974836,-0.014793958827444862,null,-0.015070755974836,0.027213243108594184,null,-0.015070755974836,-0.09432934860948526,null,-0.015070755974836,-0.0015099583064107627,null,-0.015070755974836,-0.028474856328068943,null,-0.015070755974836,0.05591947480762767,null,-0.015070755974836,-0.012200878791194537,null,-0.015070755974836,-0.017550494847514003,null,-0.015070755974836,-0.20176933670452085,null,-0.015070755974836,-0.08876986711147754,null,-0.015070755974836,-0.03680665439797601,null,-0.015070755974836,0.038054130471637145,null,-0.015070755974836,-0.15459632707958687,null,-0.015070755974836,0.2108817413003818,null,-0.015070755974836,-0.1074320392108557,null,-0.015070755974836,-0.34076102287964954,null,-0.015070755974836,0.04941418498127958,null,-0.015070755974836,-0.23178600151815423,null,-0.015070755974836,0.04837308531946771,null,-0.015070755974836,0.1070862501102821,null,-0.015070755974836,0.026603559379496024,null,-0.015070755974836,-0.1401370266343255,null,-0.015070755974836,-0.2558440596545207,null,-0.15459632707958687,-0.1690975117806332,null,-0.15459632707958687,0.33611693940702214,null,-0.15459632707958687,0.26779525913472657,null,-0.15459632707958687,-0.023952332668672964,null,-0.15459632707958687,-0.09432934860948526,null,-0.15459632707958687,-0.03680665439797601,null,-0.15459632707958687,-0.015070755974836,null,-0.15459632707958687,-0.1074320392108557,null,-0.15459632707958687,-0.23178600151815423,null,-0.15459632707958687,0.04837308531946771,null,-0.15459632707958687,0.1070862501102821,null,-0.15459632707958687,0.026603559379496024,null,-0.15459632707958687,-0.1401370266343255,null,-0.15459632707958687,-0.2558440596545207,null,-0.1074320392108557,0.09964779418926023,null,-0.1074320392108557,0.395908758306365,null,-0.1074320392108557,0.26779525913472657,null,-0.1074320392108557,-0.4480922465360008,null,-0.1074320392108557,-0.0015099583064107627,null,-0.1074320392108557,0.05591947480762767,null,-0.1074320392108557,-0.012200878791194537,null,-0.1074320392108557,-0.017550494847514003,null,-0.1074320392108557,-0.20176933670452085,null,-0.1074320392108557,-0.08876986711147754,null,-0.1074320392108557,-0.03680665439797601,null,-0.1074320392108557,-0.015070755974836,null,-0.1074320392108557,-0.15459632707958687,null,-0.1074320392108557,-0.1074320392108557,null,-0.1074320392108557,0.04941418498127958,null,-0.1074320392108557,-0.23178600151815423,null,-0.1074320392108557,0.04837308531946771,null,-0.1074320392108557,0.1070862501102821,null,-0.1074320392108557,0.026603559379496024,null,-0.1074320392108557,-0.1401370266343255,null,-0.1074320392108557,-0.2558440596545207,null,-0.23178600151815423,0.26779525913472657,null,-0.23178600151815423,0.04941418498127958,null,-0.23178600151815423,0.04837308531946771,null,-0.23178600151815423,0.1070862501102821,null,0.04837308531946771,0.09964779418926023,null,0.04837308531946771,0.08194952097500778,null,0.04837308531946771,-0.1690975117806332,null,0.04837308531946771,0.395908758306365,null,0.04837308531946771,0.10925060882471374,null,0.04837308531946771,0.26779525913472657,null,0.04837308531946771,-0.01979918442280888,null,0.04837308531946771,0.3062713594271183,null,0.04837308531946771,-0.4480922465360008,null,0.04837308531946771,0.44809826233772243,null,0.04837308531946771,-0.13675601778564356,null,0.04837308531946771,0.04250134267242095,null,0.04837308531946771,0.30578357189033234,null,0.04837308531946771,0.4479145146138027,null,0.04837308531946771,0.1702663068464682,null,0.04837308531946771,0.0966653028950195,null,0.04837308531946771,0.27787266245253656,null,0.04837308531946771,0.5994292787718007,null,0.04837308531946771,0.1619806257717881,null,0.04837308531946771,0.17229006718757392,null,0.04837308531946771,0.1522386078728198,null,0.04837308531946771,0.028607302384825114,null,0.04837308531946771,0.009541222751769338,null,0.04837308531946771,0.2384491685558417,null,0.04837308531946771,0.13640959375076997,null,0.04837308531946771,0.06331190611440535,null,0.04837308531946771,-0.009962916874576842,null,0.04837308531946771,0.29727836243286726,null,0.04837308531946771,0.060469593270392426,null,0.04837308531946771,0.005732050150491163,null,0.04837308531946771,-0.10562169416756789,null,0.04837308531946771,-0.2290384506135222,null,0.04837308531946771,0.18710599211209006,null,0.04837308531946771,-0.05023824362946272,null,0.04837308531946771,0.08943504044339054,null,0.04837308531946771,0.0990409072038064,null,0.04837308531946771,0.09546776922438927,null,0.04837308531946771,0.18702689685163446,null,0.04837308531946771,0.1553988412896176,null,0.04837308531946771,0.11475423622127827,null,0.04837308531946771,0.16740434415095717,null,0.04837308531946771,0.09303599327940484,null,0.04837308531946771,0.08246961931843445,null,0.04837308531946771,-0.5362921051027204,null,0.04837308531946771,-0.1466512420273052,null,0.04837308531946771,-0.03473556596775076,null,0.04837308531946771,0.20237710916350318,null,0.04837308531946771,0.06319647783221378,null,0.04837308531946771,0.0815418005670714,null,0.04837308531946771,0.18626857936721591,null,0.04837308531946771,0.05703330561677692,null,0.04837308531946771,-0.050828039068373396,null,0.04837308531946771,0.002455406336435857,null,0.04837308531946771,0.12816576933029103,null,0.04837308531946771,0.042607347436113545,null,0.04837308531946771,0.09423993789426603,null,0.04837308531946771,0.018380342862312632,null,0.04837308531946771,-0.1403535076089,null,0.04837308531946771,0.06871192788841603,null,0.04837308531946771,-0.023952332668672964,null,0.04837308531946771,0.6038093389309235,null,0.04837308531946771,-0.22464023841064581,null,0.04837308531946771,0.6235258820011441,null,0.04837308531946771,0.3029539735812156,null,0.04837308531946771,0.28867371863579067,null,0.04837308531946771,0.04159092720090632,null,0.04837308531946771,-0.014793958827444862,null,0.04837308531946771,0.027213243108594184,null,0.04837308531946771,-0.09432934860948526,null,0.04837308531946771,-0.0015099583064107627,null,0.04837308531946771,-0.028474856328068943,null,0.04837308531946771,0.05591947480762767,null,0.04837308531946771,-0.012200878791194537,null,0.04837308531946771,-0.017550494847514003,null,0.04837308531946771,-0.20176933670452085,null,0.04837308531946771,-0.08876986711147754,null,0.04837308531946771,-0.03680665439797601,null,0.04837308531946771,0.038054130471637145,null,0.04837308531946771,-0.015070755974836,null,0.04837308531946771,-0.15459632707958687,null,0.04837308531946771,-0.1074320392108557,null,0.04837308531946771,-0.34076102287964954,null,0.04837308531946771,0.04941418498127958,null,0.04837308531946771,-0.23178600151815423,null,0.04837308531946771,0.04837308531946771,null,0.04837308531946771,0.1070862501102821,null,0.04837308531946771,0.026603559379496024,null,0.04837308531946771,-0.1401370266343255,null,0.04837308531946771,-0.2558440596545207,null,0.04837308531946771,-0.1728408574228859,null,-0.2558440596545207,0.26779525913472657,null,-0.2558440596545207,-0.0015099583064107627,null,-0.2558440596545207,0.05591947480762767,null,-0.2558440596545207,-0.20176933670452085,null,-0.2558440596545207,-0.1074320392108557,null,-0.2558440596545207,0.04941418498127958,null,-0.2558440596545207,0.026603559379496024,null,-0.2558440596545207,-0.1401370266343255,null,-0.2558440596545207,-0.2558440596545207,null,-0.050828039068373396,0.44809826233772243,null,-0.050828039068373396,-0.391033593733103,null,-0.050828039068373396,0.10114953458154916,null,-0.050828039068373396,0.009904033766234614,null,-0.050828039068373396,-0.05702463513022102,null,-0.050828039068373396,-0.4156896382749921,null,-0.050828039068373396,-0.13675601778564356,null,-0.050828039068373396,-0.25999885017398866,null,-0.050828039068373396,-0.5608169936589029,null,-0.050828039068373396,0.1619806257717881,null,-0.050828039068373396,0.13640959375076997,null,-0.050828039068373396,-0.05023824362946272,null,-0.050828039068373396,0.09546776922438927,null,-0.050828039068373396,0.16740434415095717,null,-0.050828039068373396,0.09303599327940484,null,-0.050828039068373396,0.08246961931843445,null,-0.050828039068373396,-0.5362921051027204,null,-0.050828039068373396,-0.1466512420273052,null,-0.050828039068373396,-0.03473556596775076,null,-0.050828039068373396,0.20237710916350318,null,-0.050828039068373396,0.06319647783221378,null,-0.050828039068373396,0.0815418005670714,null,-0.050828039068373396,0.18626857936721591,null,-0.050828039068373396,0.05703330561677692,null,-0.050828039068373396,-0.050828039068373396,null,-0.050828039068373396,0.002455406336435857,null,-0.050828039068373396,0.12816576933029103,null,-0.050828039068373396,0.042607347436113545,null,-0.050828039068373396,0.09423993789426603,null,-0.050828039068373396,0.018380342862312632,null,-0.050828039068373396,-0.1403535076089,null,-0.050828039068373396,0.06871192788841603,null,-0.050828039068373396,-0.023952332668672964,null,-0.050828039068373396,0.6038093389309235,null,-0.050828039068373396,-0.22464023841064581,null,-0.050828039068373396,0.3029539735812156,null,-0.050828039068373396,0.28867371863579067,null,-0.050828039068373396,0.04159092720090632,null,-0.050828039068373396,-0.08876986711147754,null,-0.050828039068373396,-0.03680665439797601,null,-0.050828039068373396,0.1070862501102821,null,-0.050828039068373396,-0.1401370266343255,null,-0.34076102287964954,-0.15459632707958687,null,-0.34076102287964954,-0.34076102287964954,null];
+
+        // Extract nodes and edges from Plotly data
+        networkData = {
+            nodes: [],
+            edges: []
+        };
+
+        // Parse the Plotly data structure
+        if (plotlyData && plotlyData.length >= 2) {
+            const edgeTrace = plotlyData[0];
+            const nodeTrace = plotlyData[1];
+
+            // Extract nodes
+            if (nodeTrace.x && nodeTrace.y && nodeTrace.z) {
+                for (let i = 0; i < nodeTrace.x.length; i++) {
+                    const nodeName = nodeTrace.text && nodeTrace.text[i] ? nodeTrace.text[i] : `Node ${i}`;
+                    const size = nodeTrace.marker && nodeTrace.marker.size ?
+                        (Array.isArray(nodeTrace.marker.size) ? nodeTrace.marker.size[i] : nodeTrace.marker.size) : 8;
+                    const color = nodeTrace.marker && nodeTrace.marker.color ?
+                        (Array.isArray(nodeTrace.marker.color) ? nodeTrace.marker.color[i] : 0) : 0;
+
+                    networkData.nodes.push({
+                        id: i,
+                        name: nodeName,
+                        x: nodeTrace.x[i],
+                        y: nodeTrace.y[i],
+                        z: nodeTrace.z[i],
+                        size: size,
+                        degree: 0,
+                        centrality: Math.random(), // Calculate from network if available
+                        community: color
+                    });
+                }
+            }
+
+            // Extract edges from edge trace
+            if (edgeTrace.x && edgeTrace.y && edgeTrace.z) {
+                let sourceIdx = null;
+                for (let i = 0; i < edgeTrace.x.length; i++) {
+                    if (edgeTrace.x[i] === null) {
+                        sourceIdx = null;
+                        continue;
+                    }
+
+                    if (sourceIdx === null) {
+                        // Find which node this coordinate belongs to
+                        for (let j = 0; j < networkData.nodes.length; j++) {
+                            if (Math.abs(networkData.nodes[j].x - edgeTrace.x[i]) < 0.0001 &&
+                                Math.abs(networkData.nodes[j].y - edgeTrace.y[i]) < 0.0001 &&
+                                Math.abs(networkData.nodes[j].z - edgeTrace.z[i]) < 0.0001) {
+                                sourceIdx = j;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Find target node
+                        for (let j = 0; j < networkData.nodes.length; j++) {
+                            if (Math.abs(networkData.nodes[j].x - edgeTrace.x[i]) < 0.0001 &&
+                                Math.abs(networkData.nodes[j].y - edgeTrace.y[i]) < 0.0001 &&
+                                Math.abs(networkData.nodes[j].z - edgeTrace.z[i]) < 0.0001) {
+                                networkData.edges.push({
+                                    source: sourceIdx,
+                                    target: j,
+                                    weight: 1
+                                });
+                                networkData.nodes[sourceIdx].degree++;
+                                networkData.nodes[j].degree++;
+                                sourceIdx = null;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        console.log(`Loaded ${networkData.nodes.length} nodes and ${networkData.edges.length} edges`);
+
+        // Initialize visualization with actual data
+        function initializeVisualization() {
+            if (networkData.nodes.length === 0) {
+                console.warn("No network data available, using sample data");
+                generateSampleData();
+            }
+
+            const edgeX = [];
+            const edgeY = [];
+            const edgeZ = [];
+
+            networkData.edges.forEach(edge => {
+                const source = networkData.nodes[edge.source];
+                const target = networkData.nodes[edge.target];
+                edgeX.push(source.x, target.x, null);
+                edgeY.push(source.y, target.y, null);
+                edgeZ.push(source.z, target.z, null);
+            });
+
+            const edgeTrace = {
+                x: edgeX,
+                y: edgeY,
+                z: edgeZ,
+                mode: 'lines',
+                type: 'scatter3d',
+                line: {
+                    color: 'rgba(148, 163, 184, 0.3)',
+                    width: 0.5
+                },
+                hoverinfo: 'none',
+                showlegend: false
+            };
+
+            const nodeX = networkData.nodes.map(n => n.x);
+            const nodeY = networkData.nodes.map(n => n.y);
+            const nodeZ = networkData.nodes.map(n => n.z);
+            const nodeText = networkData.nodes.map(n =>
+                `${n.name}<br>Degree: ${n.degree}<br>Centrality: ${n.centrality.toFixed(2)}`
+            );
+            const nodeColors = networkData.nodes.map(n => n.community);
+
+            const nodeTrace = {
+                x: nodeX,
+                y: nodeY,
+                z: nodeZ,
+                mode: 'markers+text',
+                type: 'scatter3d',
+                text: networkData.nodes.map(n => n.name),
+                textposition: 'top center',
+                textfont: {
+                    size: 8,
+                    color: '#f1f5f9'
+                },
+                marker: {
+                    size: networkData.nodes.map(n => n.size),
+                    color: nodeColors,
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    line: {
+                        color: '#2563eb',
+                        width: 0.5
+                    },
+                    colorbar: {
+                        title: 'Community',
+                        thickness: 15,
+                        len: 0.7,
+                        bgcolor: '#1e293b',
+                        tickfont: { color: '#f1f5f9' },
+                        titlefont: { color: '#f1f5f9' }
+                    }
+                },
+                hovertext: nodeText,
+                hoverinfo: 'text',
+                showlegend: false
+            };
+
+            const data = [edgeTrace, nodeTrace];
+
+            const layout = {
+                title: '',
+                showlegend: false,
+                hovermode: 'closest',
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                paper_bgcolor: '#1e293b',
+                plot_bgcolor: '#1e293b',
+                scene: {
+                    xaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    yaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    zaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    camera: {
+                        eye: { x: 1.5, y: 1.5, z: 1.5 }
+                    },
+                    bgcolor: '#1e293b'
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['toImage'],
+                modeBarButtonsToAdd: [{
+                    name: 'Capture',
+                    icon: Plotly.Icons.camera,
+                    click: function(gd) {
+                        Plotly.downloadImage(gd, {
+                            format: 'png',
+                            width: 1920,
+                            height: 1080,
+                            filename: 'network_visualization'
+                        });
+                    }
+                }]
+            };
+
+            Plotly.newPlot('networkPlot', data, layout, config);
+
+            // Add click event listener
+            document.getElementById('networkPlot').on('plotly_click', function(data) {
+                const nodeIndex = data.points[0].pointIndex;
+                const node = networkData.nodes[nodeIndex];
+                showNodeInfo(node);
+            });
+
+            // Update statistics
+            updateStatistics();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeVisualization();
+        });
+    </script>
+    
+</body>
+</html>

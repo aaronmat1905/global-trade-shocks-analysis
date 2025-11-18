@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Trade Network - 3D Interactive Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #0ea5e9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .title-section h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* Main Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1920px;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar h2 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .control-group select,
+        .control-group input[type="text"] {
+            width: 100%;
+            padding: 0.625rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-group select:focus,
+        .control-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--dark-bg);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-item:hover {
+            background: var(--border-color);
+        }
+
+        .toggle-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        #networkPlot {
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Right Sidebar - Stats */
+        .stats-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-panel h2 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        .metric-bar {
+            margin-bottom: 1rem;
+        }
+
+        .metric-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .metric-name {
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--dark-bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Node Info Panel */
+        .node-info {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .node-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .dashboard-container {
+                grid-template-columns: 280px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .sidebar,
+            .stats-panel {
+                max-height: 300px;
+            }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="title-section">
+                    <h1>Global Trade Network Analysis</h1>
+                    <p class="subtitle">3D Interactive Visualization Dashboard</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="resetView()">
+                    <i class="fas fa-redo"></i>
+                    Reset View
+                </button>
+                <button class="btn btn-primary" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    Export Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container">
+        <!-- Left Sidebar - Controls -->
+        <aside class="sidebar">
+            <h2><i class="fas fa-sliders-h"></i> Visualization Controls</h2>
+
+            <div class="control-group">
+                <label for="layoutType">Network Layout</label>
+                <select id="layoutType" onchange="updateLayout()">
+                    <option value="3d">3D Force-Directed</option>
+                    <option value="circular">Circular Layout</option>
+                    <option value="hierarchical">Hierarchical</option>
+                    <option value="radial">Radial</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="nodeSize">Node Size: <span id="nodeSizeValue">8</span></label>
+                <input type="range" id="nodeSize" min="2" max="20" value="8" oninput="updateNodeSize(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="edgeWidth">Edge Width: <span id="edgeWidthValue">0.5</span></label>
+                <input type="range" id="edgeWidth" min="0.1" max="5" step="0.1" value="0.5" oninput="updateEdgeWidth(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="edgeOpacity">Edge Opacity: <span id="edgeOpacityValue">0.3</span></label>
+                <input type="range" id="edgeOpacity" min="0" max="1" step="0.1" value="0.3" oninput="updateEdgeOpacity(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label for="colorScheme">Color Scheme</label>
+                <select id="colorScheme" onchange="updateColorScheme()">
+                    <option value="default">Default</option>
+                    <option value="sector">By Sector</option>
+                    <option value="centrality">By Centrality</option>
+                    <option value="community">By Community</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="filterNodes">Filter Nodes</label>
+                <input type="text" id="filterNodes" placeholder="Search nodes..." oninput="filterNodes(this.value)">
+            </div>
+
+            <div class="control-group">
+                <label>Display Options</label>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <label for="showLabels">Node Labels</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showLabels" checked onchange="toggleLabels()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="showEdges">Show Edges</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showEdges" checked onchange="toggleEdges()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="showGrid">Grid Lines</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showGrid" onchange="toggleGrid()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label for="autoRotate">Auto Rotate</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoRotate" onchange="toggleAutoRotate()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2><i class="fas fa-project-diagram"></i> Network Visualization</h2>
+                <div class="view-controls">
+                    <button class="view-btn active tooltip" onclick="setView('3d')">
+                        <i class="fas fa-cube"></i>
+                        <span class="tooltiptext">3D View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('top')">
+                        <i class="fas fa-arrows-alt-v"></i>
+                        <span class="tooltiptext">Top View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('side')">
+                        <i class="fas fa-arrows-alt-h"></i>
+                        <span class="tooltiptext">Side View</span>
+                    </button>
+                    <button class="view-btn tooltip" onclick="setView('front')">
+                        <i class="fas fa-eye"></i>
+                        <span class="tooltiptext">Front View</span>
+                    </button>
+                </div>
+            </div>
+            <div id="networkPlot"></div>
+        </main>
+
+        <!-- Right Sidebar - Statistics -->
+        <aside class="stats-panel">
+            <h2><i class="fas fa-chart-bar"></i> Network Statistics</h2>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Nodes</div>
+                <div class="stat-value" id="totalNodes">-</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Active</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Edges</div>
+                <div class="stat-value" id="totalEdges">-</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-link"></i>
+                    <span>Connections</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Network Density</div>
+                <div class="stat-value" id="networkDensity">-</div>
+                <div class="stat-change">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Ratio</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Avg. Degree</div>
+                <div class="stat-value" id="avgDegree">-</div>
+                <div class="stat-change">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Per Node</span>
+                </div>
+            </div>
+
+            <h3 style="margin: 1.5rem 0 1rem; font-size: 1rem; color: var(--text-secondary);">
+                <i class="fas fa-star"></i> Top Nodes by Centrality
+            </h3>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node A</span>
+                    <span class="metric-value">0.85</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node B</span>
+                    <span class="metric-value">0.72</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 72%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node C</span>
+                    <span class="metric-value">0.68</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 68%"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <div class="metric-info">
+                    <span class="metric-name">Node D</span>
+                    <span class="metric-value">0.54</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 54%"></div>
+                </div>
+            </div>
+
+            <div class="node-info" id="selectedNodeInfo" style="display: none;">
+                <h3><i class="fas fa-info-circle"></i> Selected Node</h3>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="nodeName">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Degree:</span>
+                    <span class="info-value" id="nodeDegree">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Centrality:</span>
+                    <span class="info-value" id="nodeCentrality">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Community:</span>
+                    <span class="info-value" id="nodeCommunity">-</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // Sample network data - Replace with your actual data
+        let networkData = {
+            nodes: [],
+            edges: []
+        };
+
+        // Generate sample data for demonstration
+        function generateSampleData() {
+            const numNodes = 50;
+            const nodes = [];
+            const edges = [];
+
+            // Create nodes
+            for (let i = 0; i < numNodes; i++) {
+                nodes.push({
+                    id: i,
+                    name: `Node ${i}`,
+                    x: (Math.random() - 0.5) * 2,
+                    y: (Math.random() - 0.5) * 2,
+                    z: (Math.random() - 0.5) * 2,
+                    size: Math.random() * 10 + 5,
+                    degree: 0,
+                    centrality: Math.random(),
+                    community: Math.floor(Math.random() * 5)
+                });
+            }
+
+            // Create edges
+            for (let i = 0; i < numNodes; i++) {
+                const numConnections = Math.floor(Math.random() * 5) + 2;
+                for (let j = 0; j < numConnections; j++) {
+                    const target = Math.floor(Math.random() * numNodes);
+                    if (target !== i) {
+                        edges.push({
+                            source: i,
+                            target: target,
+                            weight: Math.random()
+                        });
+                        nodes[i].degree++;
+                    }
+                }
+            }
+
+            networkData = { nodes, edges };
+            updateStatistics();
+        }
+
+        // Initialize visualization
+        function initializeVisualization() {
+            const edgeX = [];
+            const edgeY = [];
+            const edgeZ = [];
+
+            networkData.edges.forEach(edge => {
+                const source = networkData.nodes[edge.source];
+                const target = networkData.nodes[edge.target];
+                edgeX.push(source.x, target.x, null);
+                edgeY.push(source.y, target.y, null);
+                edgeZ.push(source.z, target.z, null);
+            });
+
+            const edgeTrace = {
+                x: edgeX,
+                y: edgeY,
+                z: edgeZ,
+                mode: 'lines',
+                type: 'scatter3d',
+                line: {
+                    color: 'rgba(148, 163, 184, 0.3)',
+                    width: 0.5
+                },
+                hoverinfo: 'none',
+                showlegend: false
+            };
+
+            const nodeX = networkData.nodes.map(n => n.x);
+            const nodeY = networkData.nodes.map(n => n.y);
+            const nodeZ = networkData.nodes.map(n => n.z);
+            const nodeText = networkData.nodes.map(n =>
+                `${n.name}<br>Degree: ${n.degree}<br>Centrality: ${n.centrality.toFixed(2)}`
+            );
+            const nodeColors = networkData.nodes.map(n => n.community);
+
+            const nodeTrace = {
+                x: nodeX,
+                y: nodeY,
+                z: nodeZ,
+                mode: 'markers+text',
+                type: 'scatter3d',
+                text: networkData.nodes.map(n => n.name),
+                textposition: 'top center',
+                textfont: {
+                    size: 8,
+                    color: '#f1f5f9'
+                },
+                marker: {
+                    size: networkData.nodes.map(n => n.size),
+                    color: nodeColors,
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    line: {
+                        color: '#2563eb',
+                        width: 0.5
+                    },
+                    colorbar: {
+                        title: 'Community',
+                        thickness: 15,
+                        len: 0.7,
+                        bgcolor: '#1e293b',
+                        tickfont: { color: '#f1f5f9' },
+                        titlefont: { color: '#f1f5f9' }
+                    }
+                },
+                hovertext: nodeText,
+                hoverinfo: 'text',
+                showlegend: false
+            };
+
+            const data = [edgeTrace, nodeTrace];
+
+            const layout = {
+                title: '',
+                showlegend: false,
+                hovermode: 'closest',
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                paper_bgcolor: '#1e293b',
+                plot_bgcolor: '#1e293b',
+                scene: {
+                    xaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    yaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    zaxis: {
+                        showbackground: false,
+                        showgrid: false,
+                        showline: false,
+                        zeroline: false,
+                        showticklabels: false,
+                        title: ''
+                    },
+                    camera: {
+                        eye: { x: 1.5, y: 1.5, z: 1.5 }
+                    },
+                    bgcolor: '#1e293b'
+                }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['toImage'],
+                modeBarButtonsToAdd: [{
+                    name: 'Capture',
+                    icon: Plotly.Icons.camera,
+                    click: function(gd) {
+                        Plotly.downloadImage(gd, {
+                            format: 'png',
+                            width: 1920,
+                            height: 1080,
+                            filename: 'network_visualization'
+                        });
+                    }
+                }]
+            };
+
+            Plotly.newPlot('networkPlot', data, layout, config);
+
+            // Add click event listener
+            document.getElementById('networkPlot').on('plotly_click', function(data) {
+                const nodeIndex = data.points[0].pointIndex;
+                const node = networkData.nodes[nodeIndex];
+                showNodeInfo(node);
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            document.getElementById('totalNodes').textContent = networkData.nodes.length;
+            document.getElementById('totalEdges').textContent = networkData.edges.length;
+
+            const maxPossibleEdges = networkData.nodes.length * (networkData.nodes.length - 1) / 2;
+            const density = (networkData.edges.length / maxPossibleEdges).toFixed(3);
+            document.getElementById('networkDensity').textContent = density;
+
+            const totalDegree = networkData.nodes.reduce((sum, node) => sum + node.degree, 0);
+            const avgDegree = (totalDegree / networkData.nodes.length).toFixed(2);
+            document.getElementById('avgDegree').textContent = avgDegree;
+        }
+
+        // Show node information
+        function showNodeInfo(node) {
+            document.getElementById('selectedNodeInfo').style.display = 'block';
+            document.getElementById('nodeName').textContent = node.name;
+            document.getElementById('nodeDegree').textContent = node.degree;
+            document.getElementById('nodeCentrality').textContent = node.centrality.toFixed(3);
+            document.getElementById('nodeCommunity').textContent = `Community ${node.community}`;
+        }
+
+        // Control functions
+        function updateNodeSize(value) {
+            document.getElementById('nodeSizeValue').textContent = value;
+            // Update visualization
+        }
+
+        function updateEdgeWidth(value) {
+            document.getElementById('edgeWidthValue').textContent = value;
+            // Update visualization
+        }
+
+        function updateEdgeOpacity(value) {
+            document.getElementById('edgeOpacityValue').textContent = value;
+            // Update visualization
+        }
+
+        function updateLayout() {
+            // Implement layout change
+        }
+
+        function updateColorScheme() {
+            // Implement color scheme change
+        }
+
+        function filterNodes(query) {
+            // Implement node filtering
+        }
+
+        function toggleLabels() {
+            // Implement label toggle
+        }
+
+        function toggleEdges() {
+            // Implement edge toggle
+        }
+
+        function toggleGrid() {
+            const showGrid = document.getElementById('showGrid').checked;
+            const update = {
+                'scene.xaxis.showgrid': showGrid,
+                'scene.yaxis.showgrid': showGrid,
+                'scene.zaxis.showgrid': showGrid
+            };
+            Plotly.relayout('networkPlot', update);
+        }
+
+        let autoRotateInterval;
+        function toggleAutoRotate() {
+            const autoRotate = document.getElementById('autoRotate').checked;
+            if (autoRotate) {
+                let angle = 0;
+                autoRotateInterval = setInterval(() => {
+                    angle += 1;
+                    const radians = angle * Math.PI / 180;
+                    Plotly.relayout('networkPlot', {
+                        'scene.camera.eye': {
+                            x: 1.5 * Math.cos(radians),
+                            y: 1.5 * Math.sin(radians),
+                            z: 1.5
+                        }
+                    });
+                }, 50);
+            } else {
+                clearInterval(autoRotateInterval);
+            }
+        }
+
+        function setView(view) {
+            const buttons = document.querySelectorAll('.view-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.view-btn').classList.add('active');
+
+            const cameras = {
+                '3d': { x: 1.5, y: 1.5, z: 1.5 },
+                'top': { x: 0, y: 0, z: 2.5 },
+                'side': { x: 2.5, y: 0, z: 0 },
+                'front': { x: 0, y: 2.5, z: 0 }
+            };
+
+            Plotly.relayout('networkPlot', {
+                'scene.camera.eye': cameras[view]
+            });
+        }
+
+        function resetView() {
+            Plotly.relayout('networkPlot', {
+                'scene.camera.eye': { x: 1.5, y: 1.5, z: 1.5 }
+            });
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(networkData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'network_data.json';
+            link.click();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            generateSampleData();
+            initializeVisualization();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize('networkPlot');
+        });
+    </script>
+</body>
+</html>
