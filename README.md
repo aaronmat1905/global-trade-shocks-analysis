@@ -38,12 +38,28 @@ Unlike prior work, which often focuses on aggregate effects or isolated shocks, 
    - Map the effect of commodity shocks on sectoral performance.
 
 3. **Predictive Modeling**  
-   - Apply machine learning methods such as time-series neural networks and gradient boosting to forecast sectoral stress.  
-   - Evaluate model performance using standard metrics (RMSE, MAE, etc.).
+   - Apply machine learning methods such as tree-based models and gradient boosting to forecast sectoral stress.  
+   - Evaluate model performance using standard metrics (RMSE, MAE, R², MAPE).
 
 4. **Resilience Assessment**  
    - Develop quantitative metrics to assess sectoral resilience under varying shock scenarios.  
    - Analyze which sectors are most vulnerable and where trade linkages amplify or dampen shocks.
+
+---
+
+## Project Results Document (Summary)
+
+A consolidated results document for the "Global Commodity Shocks and Trade Networks" project summarizes all findings, diagnostics, causal estimates, and visualizations. 
+
+**Key High-Level Takeaways:**
+- **Team:** StatGeeks (Aaron T. Mathew, Preetham VJ, Akarsh T, Anirudh K) — **Date:** November 2025
+- **Core Finding:** Structural distribution shifts (pre-/post-2020 COVID and Ukraine shock) materially affect predictive generalization; causal and network analyses identify critical chokepoints (Petroleum, Trade) and policy-targetable vulnerable sectors.
+- **Dataset:** Unified master dataset (3,476 rows × 93 variables), production network (~131 sectors, ~3,401 edges).
+- **Sprint 1 (Data & Network):** Constructed complete I-O derived network with technical coefficients, Leontief inverse matrices, and centrality measures.
+- **Sprint 2 (Causal Analysis):** IV analysis confirmed energy shocks cause ~4.81% IIP decline (10% price increase); identified network bottlenecks via Betweenness Centrality and shock multiplier effects (>2x systemic amplification).
+- **Sprint 3 (Modeling & Policy):** Tree-based models (tuned Random Forest / XGBoost) proved most robust to distribution shifts; Causal ML identified heterogeneous treatment effects across sectors; policy recommendations target Top 5–7 vulnerable sectors for maximum marginal benefit.
+
+For full methodological details, statistical tables, and comprehensive figures, consult the consolidated "Project Results Document" in the deliverables folder or project archive.
 
 ---
 
@@ -82,6 +98,7 @@ global-trade-shocks-analysis/
 │   │   ├── MOSPI_Cleaned_non_matrix.xlsx       # I-O non-matrix data
 │   │   ├── master_dataset.csv                  # Complete merged dataset
 │   │   ├── master_dataset_filtered.csv         # Filtered (2010-2024)
+│   │   ├── full_ml_dataset.csv                 # ML-ready dataset with engineered features
 │   │   └── master_dataset_columns.csv          # Metadata
 │   │
 │   ├── processed_io_data/            # Network analysis outputs
@@ -126,14 +143,14 @@ global-trade-shocks-analysis/
 │   │   ├── __init__.py
 │   │   ├── clean_data.py                 # Complete data cleaning pipeline
 │   │   ├── create_master_dataset.py      # Master dataset creation
-│   │   ├── clean_commodity_prices.py     # Existing placeholder
+│   │   ├── clean_commodity_prices.py     # Commodity price cleaning
 │   │   └── README.md                     # Data processing documentation
 │   │
 │   ├── network_analysis/
 │   │   ├── __init__.py
 │   │   ├── process_io_table.py           # I-O table processing & network metrics
-│   │   ├── build_trade_network.py        # Existing placeholder
-│   │   └── visualize_networks.py         # Existing placeholder
+│   │   ├── build_trade_network.py        # Trade network construction
+│   │   └── visualize_networks.py         # Network visualization utilities
 │   │
 │   ├── causal_inference/
 │   │   ├── __init__.py
@@ -190,11 +207,56 @@ global-trade-shocks-analysis/
 │           ├── prediction_viz.py
 │           └── scenario_viz.py
 │
-├── notebooks/                        # Jupyter notebooks for exploration
-│   ├── data_cleaning.ipynb           # Data cleaning exploration (→ clean_data.py)
-│   ├── iotable_processing.ipynb      # I-O table processing (→ process_io_table.py)
-│   ├── create_master_dataset.ipynb   # Master dataset creation
-│   └── (additional notebooks TBD)
+├── notebooks/                        # Jupyter notebooks for exploration & development
+│   ├── README.md                     # Notebook overview and usage guide
+│   ├── s1_DataCleaning.ipynb         # Sprint 1: Data cleaning and EDA
+│   │   └── Purpose: Exploratory cleaning steps, outlier handling, temporal alignment.
+│   │       Outputs: Insights fed into src/data_processing/clean_data.py
+│   │
+│   ├── s1_IOTableProcessing.ipynb    # Sprint 1: I-O table processing
+│   │   └── Purpose: Technical coefficients, Leontief inverse, network metrics (degree, betweenness, PageRank).
+│   │       Outputs: Network CSV exports, feed into src/network_analysis/process_io_table.py
+│   │
+│   ├── s1_CreateMasterDataset.ipynb  # Sprint 1: Master dataset creation & feature engineering
+│   │   └── Purpose: Merge all processed data, I-O sector mapping (22 manufacturing sectors),
+│   │       derive interaction terms, lagged variables for econometric analysis.
+│   │       Outputs: data/processed/master_dataset.csv (3,476 rows × 93 cols)
+│   │
+│   ├── s2_CausalAnalysis.ipynb       # Sprint 2: Causal inference (IV, Synthetic Control, VAR)
+│   │   └── Purpose: Instrumental Variables (2SLS) with ONI & OPEC quotas; 
+│   │       Synthetic Control for shock events (2008, 2014, 2022);
+│   │       VAR/Granger Causality & Impulse Response Analysis.
+│   │       Outputs: Causal estimates, IRF plots, robustness checks
+│   │
+│   ├── s2_NetworkDynamics.ipynb      # Sprint 2: Network resilience & bottleneck analysis
+│   │   └── Purpose: Shock propagation simulations, centrality-vulnerability linkages,
+│   │       production network dynamics under targeted sector failures.
+│   │       Outputs: Shock multiplier estimates, network robustness metrics
+│   │
+│   ├── s3_FeatureEngineering.ipynb   # Sprint 3: Advanced feature engineering
+│   │   └── Purpose: Create lag features, volatility measures, shock indicators,
+│   │       interaction terms; dimensionality reduction (150+ → 50 features).
+│   │       Outputs: Feature importance rankings, engineered datasets
+│   │
+│   ├── s3_TreeBasedModels.ipynb      # Sprint 3: Tree-based predictive models
+│   │   └── Purpose: End-to-end ML pipeline: 
+│   │       - Target capping (2σ outlier handling)
+│   │       - Train/test split diagnostics (temporal coherence)
+│   │       - Feature scaling (StandardScaler)
+│   │       - Baseline models (Mean, Linear Regression)
+│   │       - Random Forest baseline & hyperparameter tuning (RandomizedSearchCV)
+│   │       - XGBoost baseline & tuning with early stopping
+│   │       - Feature importance analysis (RF vs XGB comparison)
+│   │       - Weighted ensemble optimization
+│   │       - Comprehensive error analysis (sector-level, temporal, residuals)
+│   │       - Distribution shift diagnostics (KS test, train vs test)
+│   │       Outputs: Model artifacts (pkl), comparison tables, diagnostic plots
+│   │
+│   └── s3_CausalML.ipynb             # Sprint 3: Causal Machine Learning (Heterogeneous Effects)
+│       └── Purpose: Causal Forests, R-learner, S-learner for heterogeneous treatment effects;
+│           vulnerability classification; policy targeting optimization.
+│           Outputs: CATE distributions, policy benefit frontier
+
 │
 ├── models/                           # Saved trained models
 │   ├── baseline_ols.pkl
@@ -211,88 +273,60 @@ global-trade-shocks-analysis/
 │   ├── ensemble_stacked.pkl
 │   └── model_metadata.json
 │
-├── outputs/                          # All output files
-│   ├── figures/                      # Publication-quality visualizations
-│   │   ├── networks/
-│   │   │   ├── trade_network_gephi_viz.png
-│   │   │   ├── production_network_hierarchical.png
-│   │   │   ├── network_viz_production.png
-│   │   │   ├── network_viz_trade.png
-│   │   │   ├── io_matrix_heatmap.png
-│   │   │   └── interactive_trade_network.html
-│   │   ├── causal/
-│   │   │   ├── iv_results.png
-│   │   │   ├── iv_first_stage.png
-│   │   │   ├── scm_event_2008_results.png
-│   │   │   ├── scm_event_2014_results.png
-│   │   │   ├── scm_event_2022_results.png
-│   │   │   ├── scm_placebo_test.png
-│   │   │   ├── var_irf_grid.png
-│   │   │   └── var_stability_roots.png
-│   │   ├── models/
-│   │   │   ├── baseline_predictions.png
-│   │   │   ├── lstm_learning_curves.png
-│   │   │   ├── xgboost_feature_importance.png
-│   │   │   ├── gnn_attention_weights.png
-│   │   │   ├── model_comparison_rmse.png
-│   │   │   ├── prediction_vs_actual_sector1.png
-│   │   │   ├── prediction_vs_actual_sector2.png
-│   │   │   ├── prediction_vs_actual_sector3.png
-│   │   │   ├── prediction_vs_actual_sector4.png
-│   │   │   ├── prediction_vs_actual_sector5.png
-│   │   │   └── residual_plots.png
-│   │   ├── scenarios/
-│   │   │   ├── scenario_2008_impacts.png
-│   │   │   ├── scenario_2014_impacts.png
-│   │   │   ├── scenario_2022_impacts.png
-│   │   │   ├── counterfactual_diversification.png
-│   │   │   ├── policy_strategic_reserve.png
-│   │   │   ├── policy_hedging.png
-│   │   │   ├── vulnerability_heatmap.png
-│   │   │   └── scenario_comparison_multi.png
-│   │   └── exploratory/
-│   │       ├── commodity_price_trends.png
-│   │       ├── sectoral_output_trends.png
-│   │       ├── feature_correlation_heatmap.png
-│   │       └── trade_flow_time_series.png
+├── outputs/                          # All output files (models, figures, tables)
+│   ├── models/                       # Trained model artifacts
+│   │   ├── linear_regression_baseline.pkl
+│   │   ├── random_forest_baseline.pkl
+│   │   ├── random_forest_tuned.pkl
+│   │   ├── xgboost_baseline.pkl
+│   │   └── xgboost_tuned.pkl
 │   │
-│   ├── tables/                       # Formatted tables (CSV, LaTeX, Excel)
-│   │   ├── network_metrics/
-│   │   │   ├── centrality_summary.csv
-│   │   │   ├── centrality_summary.tex
-│   │   │   ├── sector_linkages_summary.csv
-│   │   │   └── network_topology_summary.csv
-│   │   ├── causal/
-│   │   │   ├── iv_first_stage.csv
-│   │   │   ├── iv_second_stage.csv
-│   │   │   ├── iv_robustness.csv
-│   │   │   ├── scm_weights_event2008.csv
-│   │   │   ├── scm_weights_event2014.csv
-│   │   │   ├── scm_weights_event2022.csv
-│   │   │   ├── scm_treatment_effects.csv
-│   │   │   ├── granger_causality_matrix.csv
-│   │   │   ├── var_coefficients.csv
-│   │   │   ├── irf_results.csv
-│   │   │   └── fevd_results.csv
-│   │   ├── models/
-│   │   │   ├── baseline_performance.csv
-│   │   │   ├── model_comparison.csv
-│   │   │   ├── feature_importance.csv
-│   │   │   ├── cv_results.csv
-│   │   │   └── model_metrics_detailed.csv
-│   │   └── scenarios/
-│   │       ├── vulnerability_ranking.csv
-│   │       ├── scenario_impacts_2008.csv
-│   │       ├── scenario_impacts_2014.csv
-│   │       ├── scenario_impacts_2022.csv
-│   │       ├── counterfactual_results.csv
-│   │       └── policy_comparison.csv
+│   ├── figures/                      # Publication-quality visualizations
+│   │   ├── target_distribution_analysis.png
+│   │   │   └── Raw vs 2σ-capped histograms & boxplots
+│   │   ├── feature_importance_comparison.png
+│   │   │   └── Side-by-side top-30 features: Random Forest vs XGBoost
+│   │   ├── model_comparison.png
+│   │   │   └── Multi-panel comparison (R², RMSE, MAE, MAPE) across all models
+│   │   ├── sector_predictions.png
+│   │   │   └── Time-series actual vs predicted for top-5 sectors
+│   │   ├── sector_error_analysis.png
+│   │   │   └── Top sectors by MAE & error vs sample size
+│   │   ├── temporal_error_analysis.png
+│   │   │   └── MAE and bias trends over time (year-quarter)
+│   │   ├── residual_diagnostics.png
+│   │   │   └── Residuals vs predicted, histogram + normal overlay, Q-Q, time series
+│   │   ├── distribution_shift_analysis.png
+│   │   │   └── Train vs Test overlapping histograms, boxplots, CDFs
+│   │   └── (additional sector-specific and network plots as generated)
+│   │
+│   ├── tables/                       # CSV, LaTeX, and summary tables
+│   │   ├── model_comparison.csv
+│   │   │   └── RMSE, MAE, R², MAPE for all models
+│   │   ├── feature_importance.csv
+│   │   │   └── Feature rankings from RF, XGB, and ensemble
+│   │   ├── sector_error_analysis.csv
+│   │   │   └── MAE, Std, Max Error, Bias per sector
+│   │   ├── temporal_error_analysis.csv
+│   │   │   └── Error metrics by year-quarter
+│   │   ├── distribution_shift_summary.csv
+│   │   │   └── Train vs Test statistics (mean, std, min, max, KS test)
+│   │   └── (additional causal, network, and scenario tables)
 │   │
 │   └── data_quality/                 # Data validation reports
 │       ├── commodity_prices_validation.txt
 │       ├── trade_data_validation.txt
 │       ├── master_dataset_summary.txt
 │       └── missing_values_report.csv
+│
+├── sprint_3_output/                  # Sprint 3 experiment-specific outputs
+│   ├── target_distribution_analysis.png
+│   ├── feature_importance_comparison.png
+│   └── (other intermediate or exploratory artifacts)
+│
+├── sprint3_opts/                     # Alternative tuning experiment outputs
+│   ├── models/                       # Model snapshots from different tuning runs
+│   └── (other experiment-specific files)
 │
 ├── docs/                             # Documentation
 │   ├── data_sources.md
@@ -338,10 +372,10 @@ global-trade-shocks-analysis/
 
 ## Current Implementation Status
 
-### ✓ Completed Components
+### ✅ Completed Components
 
-#### Data Processing Pipeline
-- **[src/data_processing/clean_data.py](src/data_processing/clean_data.py)** - Complete data cleaning pipeline
+#### Sprint 1: Data & Network Construction
+- **[src/data_processing/clean_data.py](src/data_processing/clean_data.py)** — Complete data cleaning pipeline
   - Commodity prices processing (CMO data with shocks, volatility)
   - Climate data (ONI indices with ENSO classification)
   - Trade data processing (bilateral flows by commodity group)
@@ -350,22 +384,27 @@ global-trade-shocks-analysis/
   - GDP data (quarterly estimates with growth rates)
   - OECD data (G20 macro indicators)
 
-- **[src/network_analysis/process_io_table.py](src/network_analysis/process_io_table.py)** - I-O table processing & network analysis
+- **[src/network_analysis/process_io_table.py](src/network_analysis/process_io_table.py)** — I-O table processing & network analysis
   - Technical coefficients calculation
   - Leontief inverse matrix computation
   - Backward/forward linkage analysis
-  - Network centrality metrics (PageRank, betweenness, degree, closeness, eigenvector)
+  - Network centrality metrics (PageRank, Betweenness, Degree, Closeness, Eigenvector)
   - Production network edge list generation
 
-- **[src/data_processing/create_master_dataset.py](src/data_processing/create_master_dataset.py)** - Master dataset creation
+- **[src/data_processing/create_master_dataset.py](src/data_processing/create_master_dataset.py)** — Master dataset creation
   - Merges all processed datasets
   - IIP to I-O sector mapping (22 manufacturing sectors)
   - Derived variables & feature engineering
   - Lagged variables for econometric analysis
   - Energy intensity flags & interaction terms
 
+- **[notebooks/s1_DataCleaning.ipynb](notebooks/s1_DataCleaning.ipynb)** — Exploratory data cleaning
+- **[notebooks/s1_IOTableProcessing.ipynb](notebooks/s1_IOTableProcessing.ipynb)** — I-O network construction & metrics
+- **[notebooks/s1_CreateMasterDataset.ipynb](notebooks/s1_CreateMasterDataset.ipynb)** — Master dataset assembly
+
 #### Processed Datasets Available
-- `data/processed/master_dataset.csv` - **3,476 rows × 93 columns** (2012-2024, 22 sectors)
+- `data/processed/master_dataset.csv` — **3,476 rows × 93 columns** (2012-2024, 22 sectors)
+- `data/processed/full_ml_dataset.csv` — ML-ready with engineered features
 - All intermediate processed files in `data/processed/`
 - Network metrics in `data/processed_io_data/`
 
@@ -373,28 +412,141 @@ global-trade-shocks-analysis/
 - Complete data processing documentation in [src/data_processing/README.md](src/data_processing/README.md)
 - Data dictionary in [data/data-dictionary.md](data/data-dictionary.md)
 
-### 🚧 In Development
-- Causal inference methods (IV, Synthetic Control, VAR)
-- ML models (LSTM, XGBoost, GNN)
-- Scenario analysis & vulnerability assessment
-- Interactive dashboard
+### 🚧 In Development / Completed
 
-### 📊 Quick Start
+#### Sprint 2: Causal Analysis & Network Dynamics
+- **[notebooks/s2_CausalAnalysis.ipynb](notebooks/s2_CausalAnalysis.ipynb)** — Instrumental Variables, Synthetic Control, VAR analysis
+- **[notebooks/s2_NetworkDynamics.ipynb](notebooks/s2_NetworkDynamics.ipynb)** — Network resilience & shock propagation
+- **Key Findings:**
+  - Energy shocks: 10% oil price increase → ~4.81% IIP decline (statistically significant, p=0.0009)
+  - Network bottlenecks: Petroleum, Trade, Electricity, Construction
+  - Shock multiplier effect: >2x systemic amplification via Leontief dynamics
+  - Sargan-Hansen test confirms instrument validity (p > 0.05)
 
-To regenerate all processed data:
+#### Sprint 3: Predictive Modeling & Policy Recommendations
+- **[notebooks/s3_FeatureEngineering.ipynb](notebooks/s3_FeatureEngineering.ipynb)** — Feature selection & engineering (150+ → 50 features)
+- **[notebooks/s3_TreeBasedModels.ipynb](notebooks/s3_TreeBasedModels.ipynb)** — Tree-based ML pipeline with comprehensive diagnostics
+  - Baseline models (Mean Predictor, Linear Regression)
+  - Random Forest & XGBoost with hyperparameter tuning
+  - Feature importance analysis & weighted ensemble
+  - Distribution shift diagnostics (KS test confirms significant pre-/post-2020 shift)
+  - Sector-level, temporal, and residual error analysis
+  - **Best Model:** Tuned Random Forest with R² ≈ 0.017 (constrained by distribution shift)
+
+- **[notebooks/s3_CausalML.ipynb](notebooks/s3_CausalML.ipynb)** — Heterogeneous treatment effects & policy targeting
+  - Causal Forests & meta-learners for CATE estimation
+  - Vulnerability classification: High/Medium/Low resilience sectors
+  - Policy Benefit Frontier: optimal intervention targeting (Top 5–7 sectors recommended)
+  - Expected benefit: 0.46% aggregate IIP growth saved during shock
+
+### 📊 Key Outputs & Artifacts
+
+#### Models (outputs/models/)
+- `linear_regression_baseline.pkl`
+- `random_forest_baseline.pkl` — Baseline Random Forest
+- `random_forest_tuned.pkl` — **Best tree-based model** (R² ≈ 0.017)
+- `xgboost_baseline.pkl`
+- `xgboost_tuned.pkl` — Tuned XGBoost (R² ≈ 0.011)
+
+#### Figures (outputs/figures/)
+**Distribution & Target Analysis:**
+- `target_distribution_analysis.png` — Raw vs 2σ-capped histograms & boxplots
+- `distribution_shift_analysis.png` — Train vs Test overlap plots, CDF comparison
+
+**Model Performance:**
+- `model_comparison.png` — Multi-metric bar charts (R², RMSE, MAE, MAPE)
+- `feature_importance_comparison.png` — Top-30 features from RF & XGB side-by-side
+
+**Error Diagnostics:**
+- `sector_predictions.png` — Time-series actual vs predicted for top-5 sectors
+- `sector_error_analysis.png` — MAE rankings and error vs sample size
+- `temporal_error_analysis.png` — MAE & bias trends by year-quarter
+- `residual_diagnostics.png` — Residuals vs predicted, histogram, Q-Q, time series
+
+#### Tables (outputs/tables/)
+- `model_comparison.csv` — RMSE, MAE, R², MAPE for all models
+- `feature_importance.csv` — RF, XGB, and average importance rankings
+- `sector_error_analysis.csv` — Per-sector MAE, std, bias, sample size
+- `temporal_error_analysis.csv` — Per-quarter MAE, bias, sample size
+- `distribution_shift_summary.csv` — Train/test statistics & KS test results
+
+#### Alternative Outputs
+- `sprint_3_output/` — Experiment-specific artifacts (e.g., target distribution plots)
+- `sprint3_opts/models/` — Alternative tuning run snapshots
+
+---
+
+## Quick Start
+
+### 1. Regenerate Processed Data
+To rebuild all cleaned and processed datasets from raw files:
 
 ```bash
-# 1. Clean raw data sources
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the full cleaning pipeline
 python src/data_processing/clean_data.py
 
-# 2. Process I-O tables and calculate network metrics
+# Process I-O tables and calculate network metrics
 python src/network_analysis/process_io_table.py
 
-# 3. Create master dataset
+# Create master dataset and export
 python src/data_processing/create_master_dataset.py
 ```
 
-All outputs will be saved to `data/processed/` and `data/processed_io_data/`.
+All outputs saved to `data/processed/` and `data/processed_io_data/`.
+
+### 2. Run Notebook Workflows
+Each notebook is self-contained and documents its purpose in the header:
+
+```bash
+jupyter notebook notebooks/s3_TreeBasedModels.ipynb
+# (or any other notebook)
+```
+
+Notebooks import data from `data/processed/` and write outputs to `outputs/` and/or `sprint_3_output/`.
+
+### 3. Access Key Results
+- **Model comparison:** `outputs/tables/model_comparison.csv`
+- **Feature importance:** `outputs/tables/feature_importance.csv`
+- **Model artifacts:** `outputs/models/*.pkl`
+- **Visualizations:** `outputs/figures/`
+
+---
+
+## Key Findings Summary
+
+### Distribution Shift (Critical for Modeling)
+The project identified a **significant structural break** between training (pre-2020: volatile, COVID-affected) and test (post-2020: recovery) periods, confirmed by Kolmogorov-Smirnov test. This explains why:
+- **Linear models failed** (R² ≈ −36)
+- **Tree-based models were more robust** (tuned RF: R² ≈ 0.017)
+- **Deep learning (LSTM) overfitted** — learned high-volatility patterns that don't apply to stable test period
+
+### Causal Impact Estimates
+- **Energy shocks:** 10% oil price increase → −4.81% IIP (all manufacturing: −8.0%), p < 0.05
+- **Food shocks:** wheat prices showed negative coefficient (−2.55) but not statistically significant (p > 0.05)
+- **Instruments validated:** Sargan-Hansen test p-values > 0.05 (exogeneity confirmed)
+
+### Network Vulnerabilities
+- **Critical bottlenecks:** Petroleum Products, Trade, Electricity (ranked by Betweenness Centrality)
+- **Shock multiplier:** 10% output shock → 2.19x cumulative impact via Leontief propagation
+- **Scale-free topology:** Robust to random failures, vulnerable to targeted attacks on top ~15% central nodes
+
+### Policy Recommendations
+- **Targeting strategy:** Policy Benefit Frontier is concave → diminishing returns beyond Top 5–7 sectors
+- **Expected benefit:** Mitigation strategy could preserve **0.46% of aggregate IIP growth** during shock
+- **High-vulnerability sectors:** Other Manufacturing, Tobacco, Electrical Equipment
+- **Most resilient sectors:** Motor Vehicles, Pharmaceuticals, Basic Metals
+
+---
+
+## Team
+
+1. **Aaron Thomas Mathew** — [GitHub](https://github.com/aaronmat1905)
+2. **Preetham VJ** — [GitHub](https://github.com/PreethamVJ)
+3. **Akarsh T** — [GitHub](https://github.com/Akarsh8T)
+4. **Anirudh Krishnan** — [GitHub](https://github.com/Anirudh553)
 
 ---
 
@@ -407,13 +559,17 @@ All outputs will be saved to `data/processed/` and `data/processed_io_data/`.
    [https://arxiv.org/pdf/2112.01749](https://arxiv.org/pdf/2112.01749)  
 
 3. The Causal Effects of Commodity Shocks  
-   [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5219522](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5219522)  
+   [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5219522](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5219522)
+
+4. Leontief Model & Input-Output Analysis for Supply Chain Shock Propagation  
+   [https://mitpress.mit.edu/](https://mitpress.mit.edu/)
 
 ---
 
-## Team
+## License
 
-1. **Aaron Thomas Mathew**: [https://github.com/aaronmat1905](https://github.com/aaronmat1905)
-2. **Akarsh T**: [https://github.com/Akarsh8T](https://github.com/Akarsh8T)
-3. **Anirudh Krishnan**: [https://github.com/Anirudh553](https://github.com/Anirudh553)
-4. **Preetham VJ**: [https://github.com/PreethamVJ](https://github.com/PreethamVJ)
+This project is provided for educational purposes as part of the ADA course project (UE23AM343AB1). 
+
+---
+
+**Last Updated:** November 2025
